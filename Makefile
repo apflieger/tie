@@ -1,2 +1,2 @@
 fmt:
-	gofmt -w **/*.go
+	go fmt ./...
