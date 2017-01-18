@@ -1,15 +1,38 @@
 package args
 
-func ParseArgs(args []string) (string, []string, error) {
+import (
+	"errors"
+	"github.com/apflieger/tie/commands"
+)
+
+var (
+	NoArgsError        = errors.New("")
+	NoSuchCommandError = errors.New("")
+)
+
+func ParseArgs(args []string) (commands.Command, []string, error) {
 	if len(args) < 2 {
-		return "", nil, NoArgsError{}
+		return nil, nil, NoArgsError
 	}
 
-	return args[1], args[2:], nil
+	command, err := buildCommand(args[1])
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return command, args[2:], nil
 }
 
-type NoArgsError struct{}
+func buildCommand(verb string) (command commands.Command, err error) {
+	switch verb {
+	case "help":
+		command = commands.HelpCommand
+	}
 
-func (e NoArgsError) Error() string {
-	return ""
+	if command == nil {
+		err = NoSuchCommandError
+	}
+
+	return
 }
