@@ -23,7 +23,10 @@ func CreateTestRepo() *git.Repository {
 }
 
 func Commit(repo *git.Repository, refname string) (*git.Oid, error) {
-	signature, _ := repo.DefaultSignature()
+	signature := &git.Signature{
+		Name: "tie-test",
+		Email: "tie@test.com",
+	}
 	index, _ := repo.Index()
 	oid, _ := index.WriteTree()
 	tree, _ := repo.LookupTree(oid)
