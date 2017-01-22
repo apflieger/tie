@@ -28,6 +28,9 @@ func buildCommand(verb string) (command commands.Command, err error) {
 	switch verb {
 	case "help":
 		command = commands.HelpCommand
+		break
+	case "select":
+		command = commands.SelectCommand
 	}
 
 	if command == nil {

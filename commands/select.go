@@ -1,15 +1,21 @@
 package commands
 
-import "gopkg.in/libgit2/git2go.v25"
+import (
+	"gopkg.in/libgit2/git2go.v25"
+	"github.com/apflieger/tie/core"
+)
 
+/**
+Select the given refname. refname can be shorthand.
+ */
 func SelectCommand(repo *git.Repository, refname string) error {
-	rev, err := repo.Revparse(refname)
+	rev, err := core.Dwim(repo, refname)
 
 	if err != nil {
 		return err
 	}
 
-	commit, err := rev.From().AsCommit()
+	commit, err := repo.LookupCommit(rev.Target())
 	if err != nil {
 		return err
 	}
@@ -24,7 +30,7 @@ func SelectCommand(repo *git.Repository, refname string) error {
 		return err
 	}
 
-	_, err = repo.References.CreateSymbolic("HEAD", refname, true, "Selected "+refname)
+	_, err = repo.References.CreateSymbolic("HEAD", rev.Name(), true, "Selected "+rev.Name())
 
 	return err
 }

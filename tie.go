@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"gopkg.in/libgit2/git2go.v25"
+	"github.com/apflieger/tie/args"
 )
 
 func main() {
-	//repo, _ := git.OpenRepository(".")
-	verb := os.Args[1]
-	args := os.Args[2:]
-	fmt.Printf("verb: %v, args:%v\n", verb, args)
+	repo, _ := git.OpenRepository(".")
+	command, params, _ := args.ParseArgs(os.Args)
+	command(repo, params[0])
 }
