@@ -3,6 +3,8 @@ package core
 import (
 	"io/ioutil"
 	"gopkg.in/libgit2/git2go.v25"
+	"path/filepath"
+	"strings"
 )
 
 func CreateTestRepo() *git.Repository {
@@ -11,6 +13,10 @@ func CreateTestRepo() *git.Repository {
 
 	// git init
 	repo, _ := git.InitRepository(dir, false)
+
+	config, _ := repo.Config()
+	config.SetString("user.name", "tie-test")
+	config.SetString("user.email", "tie@test.com")
 
 	// create the first commit
 	signature, _ := repo.DefaultSignature()
@@ -23,14 +29,16 @@ func CreateTestRepo() *git.Repository {
 }
 
 func Commit(repo *git.Repository, refname string) (*git.Oid, error) {
-	signature := &git.Signature{
-		Name: "tie-test",
-		Email: "tie@test.com",
-	}
 	index, _ := repo.Index()
 	oid, _ := index.WriteTree()
+	signature, _ := repo.DefaultSignature()
 	tree, _ := repo.LookupTree(oid)
 	head, _ := repo.Head()
 	parent, _ := repo.LookupCommit(head.Target())
 	return repo.CreateCommit(refname, signature, signature, "A new commit", tree, parent)
+}
+
+func WriteFile(repo *git.Repository, file string, lines ...string) {
+	fileName := filepath.Join(repo.Path(), "..", file) // repo.Path() is the path of .git
+	ioutil.WriteFile(fileName, []byte(strings.Join(lines, "\n")), 0644)
 }
