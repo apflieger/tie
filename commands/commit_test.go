@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"testing"
 	"github.com/apflieger/tie/core"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
+	"testing"
 )
 
 func TestCommit(t *testing.T) {
@@ -27,8 +27,8 @@ func TestCommit(t *testing.T) {
 	assert.NotEqual(t, head.Target(), head2.Target())
 	statusList, _ := repo.StatusList(
 		&git.StatusOptions{
-			Show: git.StatusShowIndexAndWorkdir,
-			Flags: git.StatusOptIncludeUntracked,
+			Show:     git.StatusShowIndexAndWorkdir,
+			Flags:    git.StatusOptIncludeUntracked,
 			Pathspec: nil,
 		})
 	statusCount, _ := statusList.EntryCount()

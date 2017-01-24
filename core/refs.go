@@ -1,8 +1,8 @@
 package core
 
 import (
-	"gopkg.in/libgit2/git2go.v25"
 	"fmt"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 var refPatterns []string = []string{

@@ -1,9 +1,9 @@
 package commands
 
 import (
+	"github.com/apflieger/tie/core"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"github.com/apflieger/tie/core"
 )
 
 func TestSelectTip(t *testing.T) {

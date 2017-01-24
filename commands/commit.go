@@ -2,7 +2,7 @@ package commands
 
 import "gopkg.in/libgit2/git2go.v25"
 
-func CommitCommand(repo *git.Repository, args[] string) error {
+func CommitCommand(repo *git.Repository, args []string) error {
 	head, _ := repo.Head()
 	signature, _ := repo.DefaultSignature()
 	index, _ := repo.Index()

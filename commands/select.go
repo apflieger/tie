@@ -1,14 +1,14 @@
 package commands
 
 import (
-	"gopkg.in/libgit2/git2go.v25"
 	"github.com/apflieger/tie/core"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 /**
 Select the given refname. refname can be shorthand.
- */
-func SelectCommand(repo *git.Repository, args[] string) error {
+*/
+func SelectCommand(repo *git.Repository, args []string) error {
 	refname := args[0]
 	rev, err := core.Dwim(repo, refname)
 

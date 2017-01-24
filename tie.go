@@ -1,9 +1,9 @@
 package main
 
 import (
-	"os"
-	"gopkg.in/libgit2/git2go.v25"
 	"github.com/apflieger/tie/args"
+	"gopkg.in/libgit2/git2go.v25"
+	"os"
 )
 
 func main() {

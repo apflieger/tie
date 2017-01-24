@@ -1,8 +1,8 @@
 package core
 
 import (
-	"io/ioutil"
 	"gopkg.in/libgit2/git2go.v25"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 )
