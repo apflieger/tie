@@ -9,5 +9,5 @@ import (
 func main() {
 	repo, _ := git.OpenRepository(".")
 	command, params, _ := args.ParseArgs(os.Args)
-	command(repo, params[0])
+	command(repo, params)
 }

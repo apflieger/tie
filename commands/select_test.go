@@ -16,7 +16,7 @@ func TestSelectTip(t *testing.T) {
 	head, _ = repo.Head()
 	assert.Equal(t, "refs/heads/master", head.Name())
 
-	SelectCommand(repo, "test")
+	SelectCommand(repo, []string{"test"})
 
 	head, _ = repo.Head()
 	assert.Equal(t, "refs/tips/local/test", head.Name())

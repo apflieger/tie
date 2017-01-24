@@ -8,7 +8,8 @@ import (
 /**
 Select the given refname. refname can be shorthand.
  */
-func SelectCommand(repo *git.Repository, refname string) error {
+func SelectCommand(repo *git.Repository, args[] string) error {
+	refname := args[0]
 	rev, err := core.Dwim(repo, refname)
 
 	if err != nil {
