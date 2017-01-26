@@ -6,7 +6,6 @@ import (
 )
 
 func TestVerbs(t *testing.T) {
-	assertCommand(t, "help")
 	assertCommand(t, "select")
 	assertCommand(t, "commit")
 }
@@ -32,7 +31,7 @@ func TestNoArg(t *testing.T) {
 }
 
 func TestMultipleArgs(t *testing.T) {
-	command, params, _ := ParseArgs([]string{"tie", "help", "--opt", "param"})
+	command, params, _ := ParseArgs([]string{"tie", "select", "--opt", "param"})
 	assert.NotNil(t, command)
 	if assert.NotNil(t, params) {
 		assert.Equal(t, []string{"--opt", "param"}, params)

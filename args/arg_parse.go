@@ -26,9 +26,6 @@ func ParseArgs(args []string) (commands.Command, []string, error) {
 
 func buildCommand(verb string) (command commands.Command, err error) {
 	switch verb {
-	case "help":
-		command = commands.HelpCommand
-		break
 	case "select":
 		command = commands.SelectCommand
 		break
