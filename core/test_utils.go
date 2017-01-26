@@ -7,12 +7,15 @@ import (
 	"strings"
 )
 
-func CreateTestRepo() *git.Repository {
+func CreateTestRepo(bare bool) *git.Repository {
 	// Create a temp directory
 	dir, _ := ioutil.TempDir("", "tie-test-")
 
 	// git init
-	repo, _ := git.InitRepository(dir, false)
+	repo, _ := git.InitRepository(dir, bare)
+	if bare {
+		return repo
+	}
 
 	config, _ := repo.Config()
 	config.SetString("user.name", "tie-test")

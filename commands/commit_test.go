@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommit(t *testing.T) {
-	repo := core.CreateTestRepo()
+	repo := core.CreateTestRepo(false)
 
 	// Create a file and add it to the index
 	core.WriteFile(repo, "foo", "line")
@@ -16,10 +16,17 @@ func TestCommit(t *testing.T) {
 	index.AddByPath("foo")
 	index.Write()
 
-	// Select a tip and commit on it
+	// create/select a tip
 	head, _ := repo.Head()
 	repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 	SelectCommand(repo, []string{"test"})
+	// setup origin and base the tip on origin/master
+	origin := core.CreateTestRepo(true)
+	repo.Remotes.Create("origin", origin.Path())
+	config, _ := repo.Config()
+	config.SetString("tip.test.base", "refs/remotes/origin/master")
+
+	// tie commit
 	err := CommitCommand(repo, nil)
 
 	// We expect the target of head to have changed, status clear and HEAD still on the tip
@@ -34,4 +41,9 @@ func TestCommit(t *testing.T) {
 	statusCount, _ := statusList.EntryCount()
 	assert.Equal(t, 0, statusCount)
 	assert.Nil(t, err)
+	// We expect the tip to be pushed on origin
+	remoteTip, err := origin.References.Lookup("refs/tips/local/test")
+	if assert.Nil(t, err) {
+		assert.Equal(t, 0, remoteTip.Target().Cmp(head2.Target()))
+	}
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestSelectTip(t *testing.T) {
-	repo := core.CreateTestRepo()
+	repo := core.CreateTestRepo(false)
 	head, _ := repo.Head()
 
 	// New tip ref created on HEAD

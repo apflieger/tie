@@ -6,7 +6,7 @@ import (
 )
 
 func TestDwim(t *testing.T) {
-	repo := CreateTestRepo()
+	repo := CreateTestRepo(false)
 	head, _ := repo.Head()
 	repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 	repo.References.Create("refs/tips/origin/testorigin", head.Target(), true, "")
