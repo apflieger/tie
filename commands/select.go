@@ -16,15 +16,9 @@ func SelectCommand(repo *git.Repository, args []string) error {
 		return err
 	}
 
-	commit, err := repo.LookupCommit(rev.Target())
-	if err != nil {
-		return err
-	}
+	commit, _ := repo.LookupCommit(rev.Target())
 
-	tree, err := commit.Tree()
-	if err != nil {
-		return err
-	}
+	tree, _ := commit.Tree()
 
 	err = repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
 	if err != nil {
