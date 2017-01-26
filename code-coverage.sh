@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 set -e
-echo "" > coverage.txt
+echo "mode: set" > coverage.txt
 
 for d in $(go list ./... | grep -v vendor); do
-    go test -race -coverprofile=profile.out -covermode=atomic $d
+    go test -coverprofile=profile.out $d
     if [ -f profile.out ]; then
-        cat profile.out >> coverage.txt
+        cat profile.out | grep -v "mode: set" >> coverage.txt
         rm profile.out
     fi
 done
