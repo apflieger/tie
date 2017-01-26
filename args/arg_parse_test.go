@@ -5,8 +5,14 @@ import (
 	"testing"
 )
 
-func TestVerb(t *testing.T) {
-	command, params, _ := ParseArgs([]string{"tie", "help"})
+func TestVerbs(t *testing.T) {
+	assertCommand(t, "help")
+	assertCommand(t, "select")
+	assertCommand(t, "commit")
+}
+
+func assertCommand(t *testing.T, verb string) {
+	command, params, _ := ParseArgs([]string{"tie", verb})
 	assert.NotNil(t, command)
 	assert.NotNil(t, params)
 	assert.Empty(t, params)

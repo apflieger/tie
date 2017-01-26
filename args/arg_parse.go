@@ -31,6 +31,10 @@ func buildCommand(verb string) (command commands.Command, err error) {
 		break
 	case "select":
 		command = commands.SelectCommand
+		break
+	case "commit":
+		command = commands.CommitCommand
+		break
 	}
 
 	if command == nil {
