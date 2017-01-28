@@ -51,7 +51,6 @@ func UpgradeCommand(repo *git.Repository, args []string) error {
 	headCommit := baseCommit
 	for _, cpCommit := range cpCommitRange {
 		cherrypickOptions, _ := git.DefaultCherrypickOptions()
-		fmt.Println("cherrypick " + cpCommit.Id().String())
 		err := repo.Cherrypick(cpCommit, cherrypickOptions)
 		if err != nil {
 			return err

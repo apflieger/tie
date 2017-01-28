@@ -3,9 +3,11 @@ package core
 import "testing"
 
 func TestDumbForCodeCoverage(t *testing.T) {
-	CreateTestRepo(true)
+	bareRepo := CreateTestRepo(true)
+	defer CleanRepo(bareRepo)
 
 	repo := CreateTestRepo(false)
+	defer CleanRepo(repo)
 
 	WriteFile(repo, false, "foo", "bar")
 	WriteFile(repo, true, "foo", "bar")

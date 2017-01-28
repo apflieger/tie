@@ -3,9 +3,33 @@ package core
 import (
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 )
+
+func RunRequireRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repository)) {
+	t.Run(name, func(t *testing.T) {
+		repo := CreateTestRepo(false)
+		defer CleanRepo(repo)
+		test(t, repo)
+	})
+}
+
+func CleanRepo(repo *git.Repository) {
+	var path string
+
+	if repo.IsBare() {
+		path = repo.Path()
+	} else {
+		path = filepath.Join(repo.Path(), "..")
+	}
+
+	if len(path) > 5 { // Avoir dramatic rm -rf .
+		os.RemoveAll(path)
+	}
+}
 
 func CreateTestRepo(bare bool) *git.Repository {
 	// Create a temp directory
