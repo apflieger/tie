@@ -1,8 +1,10 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/libgit2/git2go.v25"
+	"strings"
 )
 
 var refPatterns []string = []string{
@@ -26,4 +28,11 @@ func Dwim(repo *git.Repository, shorthand string) (*git.Reference, error) {
 		}
 	}
 	return nil, fmt.Errorf("No ref found for shorthand \"%v\"", shorthand)
+}
+
+func TipName(refName string) (string, error) {
+	if !strings.HasPrefix(refName, "refs/tips/local/") {
+		return "", errors.New("")
+	}
+	return strings.Replace(refName, "refs/tips/local/", "", 1), nil
 }

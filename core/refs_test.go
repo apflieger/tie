@@ -50,3 +50,17 @@ func TestDwim(t *testing.T) {
 	assert.Equal(t, "refs/remotes/origin/testorigin", ref.Name())
 	assert.Nil(t, err)
 }
+
+func TestTipName(t *testing.T) {
+	name, err := TipName("refs/remotes/origin/master")
+	assert.Equal(t, "", name)
+	assert.NotNil(t, err)
+
+	name, err = TipName("refs/tips/origin/test")
+	assert.Equal(t, "", name)
+	assert.NotNil(t, err)
+
+	name, err = TipName("refs/tips/local/test")
+	assert.Equal(t, "test", name)
+	assert.Nil(t, err)
+}

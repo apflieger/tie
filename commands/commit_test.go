@@ -11,10 +11,7 @@ func TestCommit(t *testing.T) {
 	repo := core.CreateTestRepo(false)
 
 	// Create a file and add it to the index
-	core.WriteFile(repo, "foo", "line")
-	index, _ := repo.Index()
-	index.AddByPath("foo")
-	index.Write()
+	core.WriteFile(repo, true, "foo", "line")
 
 	// create/select a tip
 	head, _ := repo.Head()

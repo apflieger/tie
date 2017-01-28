@@ -41,7 +41,13 @@ func Commit(repo *git.Repository, refname string) (*git.Oid, error) {
 	return repo.CreateCommit(refname, signature, signature, "A new commit", tree, parent)
 }
 
-func WriteFile(repo *git.Repository, file string, lines ...string) {
+func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
 	fileName := filepath.Join(repo.Path(), "..", file) // repo.Path() is the path of .git
 	ioutil.WriteFile(fileName, []byte(strings.Join(lines, "\n")), 0644)
+
+	if add {
+		index, _ := repo.Index()
+		index.AddByPath(file)
+		index.Write()
+	}
 }

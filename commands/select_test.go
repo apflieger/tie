@@ -38,14 +38,11 @@ func TestDirtyState(t *testing.T) {
 	repo := core.CreateTestRepo(false)
 
 	// Commit a file on a new tip
-	core.WriteFile(repo, "foo", "a")
-	index, _ := repo.Index()
-	index.AddByPath("foo")
-	index.Write()
+	core.WriteFile(repo, true, "foo", "a")
 	core.Commit(repo, "refs/tips/local/test")
 
 	// write the same file on the working tree
-	core.WriteFile(repo, "foo", "b")
+	core.WriteFile(repo, false, "foo", "b")
 
 	// select the tip
 	err := SelectCommand(repo, []string{"test"})

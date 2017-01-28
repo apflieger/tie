@@ -8,6 +8,7 @@ import (
 func TestVerbs(t *testing.T) {
 	assertCommand(t, "select")
 	assertCommand(t, "commit")
+	assertCommand(t, "upgrade")
 }
 
 func assertCommand(t *testing.T, verb string) {

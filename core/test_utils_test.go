@@ -7,7 +7,8 @@ func TestDumbForCodeCoverage(t *testing.T) {
 
 	repo := CreateTestRepo(false)
 
-	WriteFile(repo, "foo", "bar")
+	WriteFile(repo, false, "foo", "bar")
+	WriteFile(repo, true, "foo", "bar")
 
 	Commit(repo, "refs/heads/master")
 }
