@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"fmt"
 	"github.com/apflieger/tie/core"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -52,12 +51,12 @@ func TestUpgrade(t *testing.T) {
 		repo.References.Create("refs/tails/test", head.Target(), true, "")
 
 		// make origin/master and the tip diverge.
-		masterOid, _ := core.Commit(repo, "refs/remotes/origin/master")
+		masterOid, _ := core.Commit(repo, &core.CommitParams{Refname: "refs/remotes/origin/master"})
 		SelectCommand(repo, []string{"refs/tips/local/test"})
 		core.WriteFile(repo, true, "foo", "line1")
-		core.Commit(repo, "refs/tips/local/test")
+		core.Commit(repo, &core.CommitParams{Refname: "refs/tips/local/test"})
 		core.WriteFile(repo, true, "foo", "line1", "line2")
-		core.Commit(repo, "refs/tips/local/test")
+		core.Commit(repo, &core.CommitParams{Refname: "refs/tips/local/test"})
 
 		// do the upgrade
 		err := UpgradeCommand(repo, nil)

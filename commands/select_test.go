@@ -12,7 +12,7 @@ func TestSelect(t *testing.T) {
 		head, _ := repo.Head()
 
 		// New tip ref created on HEAD
-		core.Commit(repo, "refs/tips/local/test")
+		repo.References.Create("refs/tips/local/test", head.Target(), false, "")
 
 		head, _ = repo.Head()
 		assert.Equal(t, "refs/heads/master", head.Name())
@@ -36,7 +36,7 @@ func TestSelect(t *testing.T) {
 	core.RunRequireRepo(t, "DirtyState", func(t *testing.T, repo *git.Repository) {
 		// Commit a file on a new tip
 		core.WriteFile(repo, true, "foo", "a")
-		core.Commit(repo, "refs/tips/local/test")
+		core.Commit(repo, &core.CommitParams{Refname: "refs/tips/local/test"})
 
 		// write the same file on the working tree
 		core.WriteFile(repo, false, "foo", "b")

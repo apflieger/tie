@@ -55,14 +55,51 @@ func CreateTestRepo(bare bool) *git.Repository {
 	return repo
 }
 
-func Commit(repo *git.Repository, refname string) (*git.Oid, error) {
+type CommitParams struct {
+	Refname  string
+	Author   *git.Signature
+	Commiter *git.Signature
+	Message  string
+}
+
+func Commit(repo *git.Repository, params *CommitParams) (*git.Oid, error) {
+	defaultSignature, _ := repo.DefaultSignature()
+	head, _ := repo.Head()
+	defaultParams := &CommitParams{
+		Refname:  head.Name(),
+		Author:   defaultSignature,
+		Commiter: defaultSignature,
+		Message:  "default message",
+	}
+
+	if params == nil {
+		params = defaultParams
+	} else {
+		if len(params.Refname) == 0 {
+			params.Refname = defaultParams.Refname
+		}
+		if params.Author == nil {
+			params.Author = defaultParams.Author
+		}
+		if params.Commiter == nil {
+			params.Commiter = defaultParams.Commiter
+		}
+		if len(params.Message) == 0 {
+			params.Message = defaultParams.Message
+		}
+	}
+
 	index, _ := repo.Index()
 	oid, _ := index.WriteTree()
-	signature, _ := repo.DefaultSignature()
 	tree, _ := repo.LookupTree(oid)
-	head, _ := repo.Head()
-	parent, _ := repo.LookupCommit(head.Target())
-	return repo.CreateCommit(refname, signature, signature, "A new commit", tree, parent)
+	ref, err := repo.References.Lookup(params.Refname)
+	// if the ref doesn't exist, lazy create it
+	if err != nil {
+		head, _ := repo.Head()
+		ref, _ = repo.References.Create(params.Refname, head.Target(), false, "")
+	}
+	parent, _ := repo.LookupCommit(ref.Target())
+	return repo.CreateCommit(params.Refname, params.Author, params.Commiter, params.Message, tree, parent)
 }
 
 func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
