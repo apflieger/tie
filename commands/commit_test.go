@@ -24,11 +24,13 @@ func TestCommit(t *testing.T) {
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		// tie commit
-		err := CommitCommand(repo, nil)
+		err := CommitCommand(repo, []string{"fix typo"})
 
-		// We expect the target of head to have changed, status clear and HEAD still on the tip
+		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
 		head2, _ := repo.Head()
-		assert.NotEqual(t, head.Target(), head2.Target())
+		newCommit, _ := repo.LookupCommit(head2.Target())
+		assert.Equal(t, 0, newCommit.Parent(0).Id().Cmp(head.Target()))
+		assert.Equal(t, "fix typo", newCommit.Message())
 		statusList, _ := repo.StatusList(
 			&git.StatusOptions{
 				Show:     git.StatusShowIndexAndWorkdir,

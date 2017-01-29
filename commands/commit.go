@@ -15,7 +15,7 @@ func CommitCommand(repo *git.Repository, args []string) error {
 	treeObj, _ := index.WriteTree()
 	tree, _ := repo.LookupTree(treeObj)
 	parent, _ := repo.LookupCommit(head.Target())
-	repo.CreateCommit(head.Name(), signature, signature, "", tree, parent)
+	repo.CreateCommit(head.Name(), signature, signature, args[0], tree, parent)
 
 	// push the tip on the remote corresponding to its base
 	config, _ := repo.Config()
