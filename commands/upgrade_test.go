@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
+	"time"
 )
 
 func TestUpgrade(t *testing.T) {
@@ -53,10 +54,19 @@ func TestUpgrade(t *testing.T) {
 		// make origin/master and the tip diverge.
 		masterOid, _ := core.Commit(repo, &core.CommitParams{Refname: "refs/remotes/origin/master"})
 		SelectCommand(repo, []string{"refs/tips/local/test"})
+		signature := &git.Signature{
+			Name: "user1",
+			Email: "email@example.com",
+			When: time.Now(),
+		}
 		core.WriteFile(repo, true, "foo", "line1")
-		core.Commit(repo, &core.CommitParams{Refname: "refs/tips/local/test"})
+		core.Commit(repo, nil)
 		core.WriteFile(repo, true, "foo", "line1", "line2")
-		core.Commit(repo, &core.CommitParams{Refname: "refs/tips/local/test"})
+		core.Commit(repo, &core.CommitParams{
+			Author: signature,
+			Commiter: signature,
+			Message: "last commit",
+		})
 
 		// do the upgrade
 		err := UpgradeCommand(repo, nil)
@@ -66,6 +76,10 @@ func TestUpgrade(t *testing.T) {
 		head, _ = repo.Head()
 		headCommit, _ := repo.LookupCommit(head.Target())
 		assert.Equal(t, 0, headCommit.Parent(0).Parent(0).Id().Cmp(masterOid))
+		assert.Equal(t, "last commit", headCommit.Message())
+		assert.Equal(t, "user1", headCommit.Author().Name)
+		assert.Equal(t, "email@example.com", headCommit.Author().Email)
+		assert.Equal(t, time.Now().Unix(), headCommit.Author().When.Unix())
 
 		// we expect the tail to be updated on origin/master's target
 		newTailRef, _ := repo.References.Lookup("refs/tails/test")

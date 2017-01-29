@@ -62,7 +62,7 @@ func UpgradeCommand(repo *git.Repository, args []string) error {
 		tree, _ := repo.LookupTree(treeObj)
 		author := cpCommit.Author()
 		committer := cpCommit.Committer()
-		newCommitOid, _ := repo.CreateCommit(head.Name(), author, committer, "", tree, headCommit)
+		newCommitOid, _ := repo.CreateCommit(head.Name(), author, committer, cpCommit.Message(), tree, headCommit)
 		newCommit, _ := repo.LookupCommit(newCommitOid)
 		headCommit = newCommit
 	}
