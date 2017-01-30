@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func RunRequireRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repository)) {
+func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		defer CleanRepo(repo)

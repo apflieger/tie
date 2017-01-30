@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommit(t *testing.T) {
-	test.RunRequireRepo(t, "Commit", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "Commit", func(t *testing.T, repo *git.Repository) {
 		// Create a file and add it to the index
 		test.WriteFile(repo, true, "foo", "line")
 

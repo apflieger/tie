@@ -8,7 +8,7 @@ import (
 )
 
 func TestSelect(t *testing.T) {
-	test.RunRequireRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 
 		// New tip ref created on HEAD
@@ -25,7 +25,7 @@ func TestSelect(t *testing.T) {
 		assert.Equal(t, "refs/tips/local/test", head.Name())
 	})
 
-	test.RunRequireRepo(t, "DwimFailed", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "DwimFailed", func(t *testing.T, repo *git.Repository) {
 		err := SelectCommand(repo, []string{"test"})
 
 		if assert.NotNil(t, err) {
@@ -33,7 +33,7 @@ func TestSelect(t *testing.T) {
 		}
 	})
 
-	test.RunRequireRepo(t, "DirtyState", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "DirtyState", func(t *testing.T, repo *git.Repository) {
 		// Commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "a")
 		test.Commit(repo, &test.CommitParams{Refname: "refs/tips/local/test"})

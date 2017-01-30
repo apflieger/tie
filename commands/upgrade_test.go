@@ -9,7 +9,7 @@ import (
 )
 
 func TestUpgrade(t *testing.T) {
-	test.RunRequireRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
 		err := UpgradeCommand(repo, nil)
 
 		if assert.NotNil(t, err) {
@@ -17,7 +17,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	test.RunRequireRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"refs/tips/local/test"})
@@ -29,7 +29,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	test.RunRequireRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"refs/tips/local/test"})
@@ -43,7 +43,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	test.RunRequireRepo(t, "UpgradeSuccess", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "UpgradeSuccess", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		config, _ := repo.Config()
 		// create a tip on head based on refs/remotes/origin/master
@@ -54,10 +54,11 @@ func TestUpgrade(t *testing.T) {
 		// make origin/master and the tip diverge.
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
 		SelectCommand(repo, []string{"refs/tips/local/test"})
+		now := time.Now()
 		signature := &git.Signature{
 			Name:  "user1",
 			Email: "email@example.com",
-			When:  time.Now(),
+			When:  now,
 		}
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, nil)
@@ -79,7 +80,7 @@ func TestUpgrade(t *testing.T) {
 		assert.Equal(t, "last commit", headCommit.Message())
 		assert.Equal(t, "user1", headCommit.Author().Name)
 		assert.Equal(t, "email@example.com", headCommit.Author().Email)
-		assert.Equal(t, time.Now().Unix(), headCommit.Author().When.Unix())
+		assert.Equal(t, now.Unix(), headCommit.Author().When.Unix())
 
 		// we expect the tail to be updated on origin/master's target
 		newTailRef, _ := repo.References.Lookup("refs/tails/test")

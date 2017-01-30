@@ -19,7 +19,7 @@ func TestDumbForCodeCoverage(t *testing.T) {
 }
 
 func TestCommit(t *testing.T) {
-	RunRequireRepo(t, "NoParams", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "NoParams", func(t *testing.T, repo *git.Repository) {
 		// commit without params
 		oid, err := Commit(repo, nil)
 
@@ -38,7 +38,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, "default message", commit.Message())
 	})
 
-	RunRequireRepo(t, "RefParam", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "RefParam", func(t *testing.T, repo *git.Repository) {
 		headBefore, _ := repo.Head()
 
 		// commit on a non existing ref
@@ -66,7 +66,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, "default message", commit.Message())
 	})
 
-	RunRequireRepo(t, "CommitParams", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "CommitParams", func(t *testing.T, repo *git.Repository) {
 		now := time.Now()
 		author := &git.Signature{
 			Name:  "Bob Morane",

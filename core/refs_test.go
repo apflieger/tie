@@ -8,7 +8,7 @@ import (
 )
 
 func TestDwim(t *testing.T) {
-	test.RunRequireRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		repo.References.Create("refs/tips/origin/testorigin", head.Target(), true, "")
