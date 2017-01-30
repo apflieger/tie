@@ -17,6 +17,17 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repo
 	})
 }
 
+func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin *git.Repository)) {
+	t.Run(name, func(t *testing.T) {
+		repo := CreateTestRepo(false)
+		defer CleanRepo(repo)
+		origin := CreateTestRepo(true)
+		defer CleanRepo(origin)
+		repo.Remotes.Create("origin", origin.Path())
+		test(t, repo, origin)
+	})
+}
+
 func CleanRepo(repo *git.Repository) {
 	var path string
 

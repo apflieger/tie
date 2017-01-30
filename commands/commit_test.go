@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommit(t *testing.T) {
-	test.RunOnRepo(t, "Commit", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRemote(t, "Commit", func(t *testing.T, repo, origin *git.Repository) {
 		// Create a file and add it to the index
 		test.WriteFile(repo, true, "foo", "line")
 
@@ -16,10 +16,6 @@ func TestCommit(t *testing.T) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"test"})
-		// setup origin and base the tip on origin/master
-		origin := test.CreateTestRepo(true)
-		defer test.CleanRepo(origin)
-		repo.Remotes.Create("origin", origin.Path())
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 

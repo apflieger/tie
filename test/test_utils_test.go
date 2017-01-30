@@ -8,14 +8,21 @@ import (
 )
 
 func TestDumbForCodeCoverage(t *testing.T) {
-	bareRepo := CreateTestRepo(true)
-	defer CleanRepo(bareRepo)
-
 	repo := CreateTestRepo(false)
 	defer CleanRepo(repo)
 
 	WriteFile(repo, false, "foo", "bar")
 	WriteFile(repo, true, "foo", "bar")
+}
+
+func TestRunOnRemote(t *testing.T) {
+	testRun := false
+	RunOnRemote(t, "NoParams", func(t *testing.T, repo, origin *git.Repository) {
+		remote, _ := repo.Remotes.Lookup("origin")
+		assert.Equal(t, origin.Path(), remote.Url())
+		testRun = true
+	})
+	assert.True(t, testRun)
 }
 
 func TestCommit(t *testing.T) {
