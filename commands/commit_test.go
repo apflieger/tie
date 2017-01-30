@@ -1,24 +1,24 @@
 package commands
 
 import (
-	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
 )
 
 func TestCommit(t *testing.T) {
-	core.RunRequireRepo(t, "Commit", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "Commit", func(t *testing.T, repo *git.Repository) {
 		// Create a file and add it to the index
-		core.WriteFile(repo, true, "foo", "line")
+		test.WriteFile(repo, true, "foo", "line")
 
 		// create/select a tip
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"test"})
 		// setup origin and base the tip on origin/master
-		origin := core.CreateTestRepo(true)
-		defer core.CleanRepo(origin)
+		origin := test.CreateTestRepo(true)
+		defer test.CleanRepo(origin)
 		repo.Remotes.Create("origin", origin.Path())
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")

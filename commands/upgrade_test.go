@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
@@ -9,7 +9,7 @@ import (
 )
 
 func TestUpgrade(t *testing.T) {
-	core.RunRequireRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
 		err := UpgradeCommand(repo, nil)
 
 		if assert.NotNil(t, err) {
@@ -17,7 +17,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	core.RunRequireRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"refs/tips/local/test"})
@@ -29,7 +29,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	core.RunRequireRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		SelectCommand(repo, []string{"refs/tips/local/test"})
@@ -43,7 +43,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	core.RunRequireRepo(t, "UpgradeSuccess", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "UpgradeSuccess", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		config, _ := repo.Config()
 		// create a tip on head based on refs/remotes/origin/master
@@ -52,20 +52,20 @@ func TestUpgrade(t *testing.T) {
 		repo.References.Create("refs/tails/test", head.Target(), true, "")
 
 		// make origin/master and the tip diverge.
-		masterOid, _ := core.Commit(repo, &core.CommitParams{Refname: "refs/remotes/origin/master"})
+		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
 		SelectCommand(repo, []string{"refs/tips/local/test"})
 		signature := &git.Signature{
-			Name: "user1",
+			Name:  "user1",
 			Email: "email@example.com",
-			When: time.Now(),
+			When:  time.Now(),
 		}
-		core.WriteFile(repo, true, "foo", "line1")
-		core.Commit(repo, nil)
-		core.WriteFile(repo, true, "foo", "line1", "line2")
-		core.Commit(repo, &core.CommitParams{
-			Author: signature,
+		test.WriteFile(repo, true, "foo", "line1")
+		test.Commit(repo, nil)
+		test.WriteFile(repo, true, "foo", "line1", "line2")
+		test.Commit(repo, &test.CommitParams{
+			Author:   signature,
 			Commiter: signature,
-			Message: "last commit",
+			Message:  "last commit",
 		})
 
 		// do the upgrade

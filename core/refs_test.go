@@ -1,13 +1,14 @@
 package core
 
 import (
+	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
 )
 
 func TestDwim(t *testing.T) {
-	RunRequireRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
+	test.RunRequireRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		repo.References.Create("refs/tips/origin/testorigin", head.Target(), true, "")
