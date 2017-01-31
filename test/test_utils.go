@@ -37,7 +37,7 @@ func CleanRepo(repo *git.Repository) {
 		path = filepath.Join(repo.Path(), "..")
 	}
 
-	if len(path) > 5 { // Avoir dramatic rm -rf .
+	if len(path) > 5 { // Avoid dramatic rm -rf .
 		os.RemoveAll(path)
 	}
 }
