@@ -15,12 +15,12 @@ func TestCommit(t *testing.T) {
 		// create/select a tip
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		SelectCommand(repo, []string{"test"})
+		SelectCommand(repo, "test")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		// tie commit
-		err := CommitCommand(repo, []string{"fix typo"})
+		err := CommitCommand(repo, "fix typo")
 
 		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
 		head2, _ := repo.Head()

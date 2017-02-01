@@ -10,7 +10,7 @@ import (
 
 func TestUpgrade(t *testing.T) {
 	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
-		err := UpgradeCommand(repo, nil)
+		err := UpgradeCommand(repo)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "HEAD not on a tip. Only tips can be upgraded.", err.Error())
@@ -20,9 +20,9 @@ func TestUpgrade(t *testing.T) {
 	test.RunOnRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		SelectCommand(repo, []string{"refs/tips/local/test"})
+		SelectCommand(repo, "refs/tips/local/test")
 
-		err := UpgradeCommand(repo, nil)
+		err := UpgradeCommand(repo)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Config value 'tip.test.base' was not found", err.Error())
@@ -32,11 +32,11 @@ func TestUpgrade(t *testing.T) {
 	test.RunOnRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		SelectCommand(repo, []string{"refs/tips/local/test"})
+		SelectCommand(repo, "refs/tips/local/test")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
-		err := UpgradeCommand(repo, nil)
+		err := UpgradeCommand(repo)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Reference 'refs/tails/test' not found", err.Error())
@@ -53,7 +53,7 @@ func TestUpgrade(t *testing.T) {
 
 		// make origin/master and the tip diverge.
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
-		SelectCommand(repo, []string{"refs/tips/local/test"})
+		SelectCommand(repo, "refs/tips/local/test")
 		now := time.Now()
 		signature := &git.Signature{
 			Name:  "user1",
@@ -70,7 +70,7 @@ func TestUpgrade(t *testing.T) {
 		})
 
 		// do the upgrade
-		err := UpgradeCommand(repo, nil)
+		err := UpgradeCommand(repo)
 		assert.Nil(t, err)
 
 		// we expect the tip to be on top of origin/master

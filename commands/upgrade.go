@@ -10,7 +10,7 @@ import (
 /**
 Select the given refname. refname can be shorthand.
 */
-func UpgradeCommand(repo *git.Repository, args []string) error {
+func UpgradeCommand(repo *git.Repository) error {
 	head, _ := repo.Head()
 	tipName, err := core.TipName(head.Name())
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func CommitCommand(repo *git.Repository, args []string) error {
+func CommitCommand(repo *git.Repository, message string) error {
 	// like git commit
 	head, _ := repo.Head()
 	signature, _ := repo.DefaultSignature()
@@ -15,7 +15,7 @@ func CommitCommand(repo *git.Repository, args []string) error {
 	treeObj, _ := index.WriteTree()
 	tree, _ := repo.LookupTree(treeObj)
 	parent, _ := repo.LookupCommit(head.Target())
-	repo.CreateCommit(head.Name(), signature, signature, args[0], tree, parent)
+	repo.CreateCommit(head.Name(), signature, signature, message, tree, parent)
 
 	// push the tip on the remote corresponding to its base
 	config, _ := repo.Config()

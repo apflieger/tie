@@ -18,7 +18,7 @@ func TestSelect(t *testing.T) {
 		assert.Equal(t, "refs/heads/master", head.Name())
 
 		// Select the test tip
-		SelectCommand(repo, []string{"test"})
+		SelectCommand(repo, "test")
 
 		// We expect HEAD to be attached on the tip
 		head, _ = repo.Head()
@@ -26,7 +26,7 @@ func TestSelect(t *testing.T) {
 	})
 
 	test.RunOnRepo(t, "DwimFailed", func(t *testing.T, repo *git.Repository) {
-		err := SelectCommand(repo, []string{"test"})
+		err := SelectCommand(repo, "test")
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "No ref found for shorthand \"test\"", err.Error())
@@ -42,7 +42,7 @@ func TestSelect(t *testing.T) {
 		test.WriteFile(repo, false, "foo", "b")
 
 		// select the tip
-		err := SelectCommand(repo, []string{"test"})
+		err := SelectCommand(repo, "test")
 
 		// We expect the select to fail because the checkout has a conflict
 		if assert.NotNil(t, err) {

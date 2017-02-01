@@ -5,12 +5,8 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-/**
-Select the given refname. refname can be shorthand.
-*/
-func SelectCommand(repo *git.Repository, args []string) error {
-	refname := args[0]
-	rev, err := core.Dwim(repo, refname)
+func SelectCommand(repo *git.Repository, shorthand string) error {
+	rev, err := core.Dwim(repo, shorthand)
 
 	if err != nil {
 		return err
