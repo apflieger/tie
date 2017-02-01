@@ -1,6 +1,11 @@
+.PHONY: test
+
 fmt:
-	go fmt ./...
+	./script/fmt.sh
 
 cover:
-	./code-coverage.sh
+	./script/cover.sh
 	go tool cover -html=coverage.txt
+
+test:
+	./script/test.sh
