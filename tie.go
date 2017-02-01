@@ -16,6 +16,7 @@ func main() {
 	rootCmd.AddCommand(buildCommitCommand(repo))
 	rootCmd.AddCommand(buildSelectCommand(repo))
 	rootCmd.AddCommand(buildUpgradeCommand(repo))
+	rootCmd.AddCommand(buildRewriteCommand(repo))
 
 	rootCmd.Execute()
 }
@@ -57,4 +58,22 @@ func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 	}
 
 	return upgrdeCommand
+}
+
+func buildRewriteCommand(repo *git.Repository) *cobra.Command {
+
+	rewriteCommand := &cobra.Command{
+		Use: "rewrite",
+	}
+
+	amendCommand := &cobra.Command{
+		Use: "amend",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.AmendCommand(repo)
+		},
+	}
+
+	rewriteCommand.AddCommand(amendCommand)
+
+	return rewriteCommand
 }
