@@ -2,20 +2,16 @@ package commands
 
 import (
 	"fmt"
+	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 	"regexp"
 	"strings"
 )
 
 func CommitCommand(repo *git.Repository, message string) error {
-	// like git commit
-	head, _ := repo.Head()
+	head, headCommit, tree := core.PrepareCommit(repo)
 	signature, _ := repo.DefaultSignature()
-	index, _ := repo.Index()
-	treeObj, _ := index.WriteTree()
-	tree, _ := repo.LookupTree(treeObj)
-	parent, _ := repo.LookupCommit(head.Target())
-	repo.CreateCommit(head.Name(), signature, signature, message, tree, parent)
+	repo.CreateCommit(head.Name(), signature, signature, message, tree, headCommit)
 
 	// push the tip on the remote corresponding to its base
 	config, _ := repo.Config()
