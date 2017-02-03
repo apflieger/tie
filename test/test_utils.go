@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"os"
@@ -83,11 +84,15 @@ func Commit(repo *git.Repository, params *CommitParams) (*git.Oid, error) {
 		Message:  "default message",
 	}
 
+	reset := false
+
 	if params == nil {
 		params = defaultParams
 	} else {
 		if len(params.Refname) == 0 {
 			params.Refname = defaultParams.Refname
+		} else {
+			reset = true
 		}
 		if params.Author == nil {
 			params.Author = defaultParams.Author
@@ -110,7 +115,13 @@ func Commit(repo *git.Repository, params *CommitParams) (*git.Oid, error) {
 		ref, _ = repo.References.Create(params.Refname, head.Target(), false, "")
 	}
 	parent, _ := repo.LookupCommit(ref.Target())
-	return repo.CreateCommit(params.Refname, params.Author, params.Commiter, params.Message, tree, parent)
+	createdOid, err := repo.CreateCommit(params.Refname, params.Author, params.Commiter, params.Message, tree, parent)
+
+	if reset {
+		repo.ResetToCommit(parent, git.ResetHard, &git.CheckoutOpts{Strategy: git.CheckoutForce})
+	}
+
+	return createdOid, err
 }
 
 func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
@@ -122,4 +133,15 @@ func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
 		index.AddByPath(file)
 		index.Write()
 	}
+}
+
+func StatusClean(t *testing.T, repo *git.Repository) bool {
+	statusList, _ := repo.StatusList(
+		&git.StatusOptions{
+			Show:     git.StatusShowIndexAndWorkdir,
+			Flags:    git.StatusOptIncludeUntracked,
+			Pathspec: nil,
+		})
+	statusCount, _ := statusList.EntryCount()
+	return assert.Equal(t, 0, statusCount, "status not clean")
 }

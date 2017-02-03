@@ -17,6 +17,7 @@ func main() {
 	rootCmd.AddCommand(buildSelectCommand(repo))
 	rootCmd.AddCommand(buildUpgradeCommand(repo))
 	rootCmd.AddCommand(buildRewriteCommand(repo))
+	rootCmd.AddCommand(buildTipCommand(repo))
 
 	rootCmd.Execute()
 }
@@ -76,4 +77,22 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	rewriteCommand.AddCommand(amendCommand)
 
 	return rewriteCommand
+}
+
+func buildTipCommand(repo *git.Repository) *cobra.Command {
+
+	tipCommand := &cobra.Command{
+		Use: "tip",
+	}
+
+	createCommand := &cobra.Command{
+		Use: "create",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.TipCreateCommand(repo, args[0], args[1])
+		},
+	}
+
+	tipCommand.AddCommand(createCommand)
+
+	return tipCommand
 }

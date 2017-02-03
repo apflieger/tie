@@ -27,10 +27,13 @@ func TestRunOnRemote(t *testing.T) {
 
 func TestCommit(t *testing.T) {
 	RunOnRepo(t, "NoParams", func(t *testing.T, repo *git.Repository) {
+		WriteFile(repo, true, "foo", "bar")
 		// commit without params
 		oid, err := Commit(repo, nil)
 
 		assert.Nil(t, err)
+
+		StatusClean(t, repo)
 
 		// HEAD should point to the new commit
 		head, _ := repo.Head()
