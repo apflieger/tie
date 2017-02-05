@@ -35,7 +35,7 @@ func CleanRepo(repo *git.Repository) {
 	if repo.IsBare() {
 		path = repo.Path()
 	} else {
-		path = filepath.Join(repo.Path(), "..")
+		path = repo.Workdir()
 	}
 
 	if len(path) > 5 { // Avoid dramatic rm -rf .
@@ -125,7 +125,7 @@ func Commit(repo *git.Repository, params *CommitParams) (*git.Oid, error) {
 }
 
 func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
-	fileName := filepath.Join(repo.Path(), "..", file) // repo.Path() is the path of .git
+	fileName := filepath.Join(repo.Workdir(), file)
 	ioutil.WriteFile(fileName, []byte(strings.Join(lines, "\n")), 0644)
 
 	if add {
