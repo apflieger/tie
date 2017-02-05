@@ -22,11 +22,8 @@ func TipCreateCommand(repo *git.Repository, name, base string) error {
 		repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
 	}
 
-	remote, err := core.RemoteName(baseRef.Name())
-
-	if err == nil {
-		_, err = repo.References.Lookup(fmt.Sprintf("refs/tips/%v/%v", remote, name))
-		if err == nil {
+	if remote, err := core.RemoteName(baseRef.Name()); err == nil {
+		if _, err = repo.References.Lookup(fmt.Sprintf("refs/tips/%v/%v", remote, name)); err == nil {
 			return fmt.Errorf("Failed to create tip \"%v\". A tip with that name already exists on %v.", name, remote)
 		}
 	}
