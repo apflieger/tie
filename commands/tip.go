@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 )
 
@@ -11,10 +12,23 @@ func TipCreateCommand(repo *git.Repository, name, base string) error {
 	if len(base) == 0 {
 		baseRef, _ = repo.Head()
 	} else {
-		baseRef, _ = repo.References.Lookup(base)
+		var err error
+		baseRef, err = repo.References.Lookup(base)
+		if err != nil {
+			return err
+		}
 		commit, _ := repo.LookupCommit(baseRef.Target())
 		tree, _ := commit.Tree()
 		repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
+	}
+
+	remote, err := core.RemoteName(baseRef.Name())
+
+	if err == nil {
+		_, err = repo.References.Lookup(fmt.Sprintf("refs/tips/%v/%v", remote, name))
+		if err == nil {
+			return fmt.Errorf("Failed to create tip \"%v\". A tip with that name already exists on %v.", name, remote)
+		}
 	}
 
 	tipRef, err := repo.References.Create(fmt.Sprintf("refs/tips/local/%v", name), baseRef.Target(), false, "tie tip create")

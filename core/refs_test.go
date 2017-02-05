@@ -67,3 +67,16 @@ func TestTipName(t *testing.T) {
 	assert.Equal(t, "test", name)
 	assert.Nil(t, err)
 }
+
+func TestRemoteName(t *testing.T) {
+	_, err := RemoteName("refs/heads/master")
+	assert.NotNil(t, err)
+
+	remote, err := RemoteName("refs/remotes/origin/master")
+	assert.Nil(t, err)
+	assert.Equal(t, "origin", remote)
+
+	remote, err = RemoteName("refs/remotes/origin/features/work")
+	assert.Nil(t, err)
+	assert.Equal(t, "origin", remote)
+}

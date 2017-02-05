@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/libgit2/git2go.v25"
+	"regexp"
 	"strings"
 )
 
@@ -35,4 +36,13 @@ func TipName(refName string) (string, error) {
 		return "", errors.New("")
 	}
 	return strings.Replace(refName, "refs/tips/local/", "", 1), nil
+}
+
+func RemoteName(ref string) (string, error) {
+	regexp := regexp.MustCompile(`refs/remotes/([^/]*)/.*`)
+	matches := regexp.FindStringSubmatch(ref)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("\"%v\" is not a remote branch.", ref)
+	}
+	return matches[1], nil
 }

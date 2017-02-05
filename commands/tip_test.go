@@ -69,4 +69,27 @@ func TestTipCreate(t *testing.T) {
 			assert.Equal(t, "Failed to write reference 'refs/tips/local/test': a reference with that name already exists.", err.Error())
 		}
 	})
+
+	test.RunOnRepo(t, "BaseDoesntExists", func(t *testing.T, repo *git.Repository) {
+
+		err := TipCreateCommand(repo, "test", "refs/remotes/github/master")
+
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Reference 'refs/remotes/github/master' not found", err.Error())
+		}
+	})
+
+	test.RunOnRepo(t, "RemoteTipAlreadyExists", func(t *testing.T, repo *git.Repository) {
+		head, _ := repo.Head()
+
+		repo.References.Create("refs/tips/github/test", head.Target(), true, "")
+		repo.References.Create("refs/remotes/github/master", head.Target(), true, "")
+
+		// create a tip based on some branch on github
+		err := TipCreateCommand(repo, "test", "refs/remotes/github/master")
+
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Failed to create tip \"test\". A tip with that name already exists on github.", err.Error())
+		}
+	})
 }
