@@ -69,5 +69,7 @@ func UpgradeCommand(repo *git.Repository) error {
 
 	tailRef.SetTarget(baseCommit.Id(), "tie update")
 
+	repo.StateCleanup()
+
 	return nil
 }

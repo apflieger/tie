@@ -85,5 +85,8 @@ func TestUpgrade(t *testing.T) {
 		// we expect the tail to be updated on origin/master's target
 		newTailRef, _ := repo.References.Lookup("refs/tails/test")
 		assert.Equal(t, 0, newTailRef.Target().Cmp(masterOid))
+
+		// the repo state should be clean
+		assert.Equal(t, git.RepositoryStateNone, repo.State())
 	})
 }
