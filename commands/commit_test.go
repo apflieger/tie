@@ -8,7 +8,7 @@ import (
 )
 
 func TestCommit(t *testing.T) {
-	test.RunOnRemote(t, "Commit", func(t *testing.T, repo, origin *git.Repository) {
+	test.RunOnRemote(t, "Commit", func(t *testing.T, repo, remote *git.Repository) {
 		// Create a file and add it to the index
 		test.WriteFile(repo, true, "foo", "line")
 
@@ -37,7 +37,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, 0, statusCount)
 		assert.Nil(t, err)
 		// We expect the tip to be pushed on origin
-		remoteTip, err := origin.References.Lookup("refs/tips/local/test")
+		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head2.Target()))
 		}

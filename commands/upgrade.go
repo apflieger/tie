@@ -71,5 +71,7 @@ func UpgradeCommand(repo *git.Repository) error {
 
 	repo.StateCleanup()
 
+	core.PushTip(repo, head)
+
 	return nil
 }

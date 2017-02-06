@@ -9,13 +9,15 @@ import (
 )
 
 func TestRewrite(t *testing.T) {
-	test.RunOnRepo(t, "AmendHead", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRemote(t, "AmendHead", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
 			Message: "first commit",
 			Refname: "refs/tips/local/test",
 		})
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		// select the tip
 		repo.References.CreateSymbolic("HEAD", "refs/tips/local/test", true, "")
@@ -52,5 +54,11 @@ func TestRewrite(t *testing.T) {
 			commit = commit.Parent(0)
 		}
 		assert.Equal(t, 2, logSize)
+
+		// We expect the tip to be pushed on origin
+		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
+		if assert.Nil(t, err) {
+			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+		}
 	})
 }

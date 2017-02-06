@@ -10,6 +10,9 @@ import (
 	"testing"
 )
 
+/*
+The given repo is attached on refs/heads/master, which has one single commit.
+*/
 func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
@@ -18,6 +21,9 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repo
 	})
 }
 
+/*
+Same as RunOnRepo. In addition, repo has a configured origin remote.
+*/
 func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)

@@ -43,7 +43,7 @@ func TestUpgrade(t *testing.T) {
 		}
 	})
 
-	test.RunOnRepo(t, "UpgradeSuccess", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRemote(t, "UpgradeSuccess", func(t *testing.T, repo, remote *git.Repository) {
 		head, _ := repo.Head()
 		config, _ := repo.Config()
 		// create a tip on head based on refs/remotes/origin/master
@@ -88,5 +88,11 @@ func TestUpgrade(t *testing.T) {
 
 		// the repo state should be clean
 		assert.Equal(t, git.RepositoryStateNone, repo.State())
+
+		// We expect the tip to be pushed on origin
+		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
+		if assert.Nil(t, err) {
+			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+		}
 	})
 }
