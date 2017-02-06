@@ -44,9 +44,9 @@ func TestUpgrade(t *testing.T) {
 	})
 
 	test.RunOnRemote(t, "UpgradeSuccess", func(t *testing.T, repo, remote *git.Repository) {
+		// create a tip on head based on refs/remotes/origin/master
 		head, _ := repo.Head()
 		config, _ := repo.Config()
-		// create a tip on head based on refs/remotes/origin/master
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
 		repo.References.Create("refs/tails/test", head.Target(), true, "")
@@ -93,6 +93,28 @@ func TestUpgrade(t *testing.T) {
 		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+		}
+	})
+
+	test.RunOnRemote(t, "Conflict", func(t *testing.T, repo, remote *git.Repository) {
+		// create a tip on head based on master
+		head, _ := repo.Head()
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/heads/master")
+		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
+		repo.References.Create("refs/tails/test", head.Target(), true, "")
+
+		// make master and the tip having a conflict.
+		test.WriteFile(repo, true, "foo", "line1")
+		test.Commit(repo, nil)
+		SelectCommand(repo, "refs/tips/local/test")
+		test.WriteFile(repo, true, "foo", "line1 bis")
+		test.Commit(repo, nil)
+
+		// do the upgrade
+		err := UpgradeCommand(repo)
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
 	})
 }

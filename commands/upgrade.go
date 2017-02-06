@@ -51,12 +51,11 @@ func UpgradeCommand(repo *git.Repository) error {
 	headCommit := baseCommit
 	for _, cpCommit := range cpCommitRange {
 		cherrypickOptions, _ := git.DefaultCherrypickOptions()
-		err := repo.Cherrypick(cpCommit, cherrypickOptions)
-		if err != nil {
-			return err
-		}
-
+		repo.Cherrypick(cpCommit, cherrypickOptions)
 		index, _ := repo.Index()
+		if index.HasConflicts() {
+			return errors.New("Conflict while upgrading")
+		}
 		index.Write()
 		treeObj, _ := index.WriteTree()
 		tree, _ := repo.LookupTree(treeObj)
