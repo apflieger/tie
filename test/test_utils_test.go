@@ -13,6 +13,8 @@ func TestDumbForCodeCoverage(t *testing.T) {
 
 	WriteFile(repo, false, "foo", "bar")
 	WriteFile(repo, true, "foo", "bar")
+
+	MockOpenEditor(nil, "")
 }
 
 func TestRunOnRemote(t *testing.T) {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/apflieger/tie/commands"
+	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/os"
 	"github.com/spf13/cobra"
 	"gopkg.in/libgit2/git2go.v25"
 )
@@ -28,7 +30,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	commitCommand := &cobra.Command{
 		Use: "commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.CommitCommand(repo, message)
+			return commands.CommitCommand(repo, message, os.OpenEditor)
 		},
 	}
 
@@ -67,12 +69,17 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 		Use: "rewrite",
 	}
 
+	var message string
+
 	amendCommand := &cobra.Command{
 		Use: "amend",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.AmendCommand(repo)
+			return commands.AmendCommand(repo, message, os.OpenEditor)
 		},
 	}
+
+	amendCommand.Flags().StringVarP(&message, "message", "m", core.OptionMissing, "commit message")
+	amendCommand.Flag("message").NoOptDefVal = core.OptionWithoutValue
 
 	rewriteCommand.AddCommand(amendCommand)
 

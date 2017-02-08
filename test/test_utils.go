@@ -151,3 +151,7 @@ func StatusClean(t *testing.T, repo *git.Repository) bool {
 	statusCount, _ := statusList.EntryCount()
 	return assert.Equal(t, 0, statusCount, "status not clean")
 }
+
+func MockOpenEditor(config *git.Config, file string) (string, error) {
+	return "mocked file", nil
+}
