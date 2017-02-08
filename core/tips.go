@@ -1,8 +1,9 @@
 package core
 
 import (
-	"gopkg.in/libgit2/git2go.v25"
 	"fmt"
+	"github.com/apflieger/tie/os"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.Commit, treeToCommit *git.Tree) {
@@ -23,7 +24,14 @@ func PushTip(repo *git.Repository, tip *git.Reference) {
 	remote, _ := repo.Remotes.Lookup(remoteName)
 
 	// push the tip on the remote
-	remote.Push([]string{fmt.Sprintf("+%v:%v", tip.Name(), tip.Name())}, nil)
+	pushOptions := &git.PushOptions{
+		RemoteCallbacks: git.RemoteCallbacks{
+			CredentialsCallback:      os.CredentialCallback,
+			CertificateCheckCallback: os.CertificateCheckCallback,
+		},
+	}
+
+	remote.Push([]string{fmt.Sprintf("+%v:%v", tip.Name(), tip.Name())}, pushOptions)
 
 	// create the local remote ref
 	repo.References.Create(fmt.Sprintf("refs/tips/%v/%v", remoteName, tipName), tip.Target(), true, "push tip")
@@ -32,7 +40,7 @@ func PushTip(repo *git.Repository, tip *git.Reference) {
 	compat, _ := config.LookupBool("tie.pushTipsAsBranches")
 
 	if compat {
-		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", tip.Name(), tipName)}, nil)
+		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", tip.Name(), tipName)}, pushOptions)
 		repo.References.Create(fmt.Sprintf("refs/remotes/%v/tips/%v", remoteName, tipName), tip.Target(), true, "push tip")
 	}
 }
