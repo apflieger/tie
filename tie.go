@@ -40,7 +40,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 func buildSelectCommand(repo *git.Repository) *cobra.Command {
 
 	selectCommand := &cobra.Command{
-		Use: "select",
+		Use: "select <tip or branch>",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.SelectCommand(repo, args[0])
 		},
@@ -86,7 +86,7 @@ func buildTipCommand(repo *git.Repository) *cobra.Command {
 	}
 
 	createCommand := &cobra.Command{
-		Use: "create",
+		Use: "create <tipName> [<base>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.TipCreateCommand(repo, args[0], args[1])
 		},
