@@ -10,6 +10,7 @@ func AmendCommand(repo *git.Repository) error {
 	committer, _ := repo.DefaultSignature()
 	_, err := headCommit.Amend(head.Name(), headCommit.Author(), committer, headCommit.Message(), tree)
 
+	head, _ = repo.Head()
 	core.PushTip(repo, head)
 
 	return err

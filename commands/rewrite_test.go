@@ -60,5 +60,11 @@ func TestRewrite(t *testing.T) {
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
 		}
+
+		// The local remote tip should be set as well
+		remoteTip, err = repo.References.Lookup("refs/tips/origin/test")
+		if assert.Nil(t, err) {
+			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+		}
 	})
 }
