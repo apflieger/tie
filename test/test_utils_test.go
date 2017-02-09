@@ -5,6 +5,7 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
 	"time"
+	"bytes"
 )
 
 func TestDumbForCodeCoverage(t *testing.T) {
@@ -15,6 +16,13 @@ func TestDumbForCodeCoverage(t *testing.T) {
 	WriteFile(repo, true, "foo", "bar")
 
 	MockOpenEditor(nil, "")
+}
+
+func TestCreateTestLogger(t *testing.T) {
+	var logBuffer *bytes.Buffer
+	logger := CreateTestLogger(&logBuffer)
+	logger.Print("hi")
+	assert.Equal(t, "hi\n", logBuffer.String())
 }
 
 func TestRunOnRemote(t *testing.T) {

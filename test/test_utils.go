@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"bytes"
+	"log"
 )
 
 /*
@@ -71,6 +73,12 @@ func CreateTestRepo(bare bool) *git.Repository {
 	repo.CreateCommit("HEAD", signature, signature, "First commit", tree, []*git.Commit{}...)
 
 	return repo
+}
+
+func CreateTestLogger(buffer **bytes.Buffer) *log.Logger {
+	b := new(bytes.Buffer)
+	*buffer = b
+	return log.New(*buffer, "", 0)
 }
 
 type CommitParams struct {

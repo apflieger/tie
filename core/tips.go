@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"github.com/apflieger/tie/os"
 	"gopkg.in/libgit2/git2go.v25"
+	"github.com/apflieger/tie/env"
 )
 
 func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.Commit, treeToCommit *git.Tree) {
@@ -26,8 +26,8 @@ func PushTip(repo *git.Repository, tip *git.Reference) {
 	// push the tip on the remote
 	pushOptions := &git.PushOptions{
 		RemoteCallbacks: git.RemoteCallbacks{
-			CredentialsCallback:      os.CredentialCallback,
-			CertificateCheckCallback: os.CertificateCheckCallback,
+			CredentialsCallback:      env.CredentialCallback,
+			CertificateCheckCallback: env.CertificateCheckCallback,
 		},
 	}
 

@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
+	"bytes"
 )
 
 func TestSelect(t *testing.T) {
@@ -49,4 +50,28 @@ func TestSelect(t *testing.T) {
 			assert.Equal(t, "1 conflict prevents checkout", err.Error())
 		}
 	})
+}
+
+func TestList(t *testing.T) {
+	test.RunOnRepo(t, "DefaultListing", func(t *testing.T, repo *git.Repository) {
+		setupRefs(repo)
+		var logBuffer *bytes.Buffer
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false)
+		assert.Equal(t,
+			"refs/tips/local/tip1\n" +
+			"refs/tips/local/tip2\n",
+			logBuffer.String())
+	})
+}
+
+func setupRefs(repo *git.Repository) {
+	head, _ := repo.Head()
+	oid := head.Target()
+	repo.References.Create("refs/tips/local/tip1", oid, false, "")
+	repo.References.Create("refs/tips/local/tip2", oid, false, "")
+	repo.References.Create("refs/tips/origin/tip3", oid, false, "")
+	repo.References.Create("refs/tips/github/tip4", oid, false, "")
+	repo.References.Create("refs/heads/branch1", oid, false, "")
+	repo.References.Create("refs/remotes/origin/branch2", oid, false, "")
+	repo.References.Create("refs/remotes/github/branch3", oid, false, "")
 }

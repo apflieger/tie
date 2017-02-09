@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/apflieger/tie/commands"
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/os"
+	"github.com/apflieger/tie/env"
 	"github.com/spf13/cobra"
 	"gopkg.in/libgit2/git2go.v25"
+	"log"
+	"os"
 )
 
 func main() {
@@ -15,8 +17,10 @@ func main() {
 		SilenceUsage: true,
 	}
 
+	logger := log.New(os.Stdout, "", 0)
+
 	rootCmd.AddCommand(buildCommitCommand(repo))
-	rootCmd.AddCommand(buildSelectCommand(repo))
+	rootCmd.AddCommand(buildSelectCommand(repo, logger))
 	rootCmd.AddCommand(buildUpgradeCommand(repo))
 	rootCmd.AddCommand(buildRewriteCommand(repo))
 	rootCmd.AddCommand(buildTipCommand(repo))
@@ -30,7 +34,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	commitCommand := &cobra.Command{
 		Use: "commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.CommitCommand(repo, message, os.OpenEditor)
+			return commands.CommitCommand(repo, message, env.OpenEditor)
 		},
 	}
 
@@ -39,14 +43,23 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	return commitCommand
 }
 
-func buildSelectCommand(repo *git.Repository) *cobra.Command {
+func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
+
+	var listTips, listBranches, listRemotes bool;
 
 	selectCommand := &cobra.Command{
-		Use: "select <tip or branch>",
+		Use: "select [flags] [<tip or branch>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes)
+			}
 			return commands.SelectCommand(repo, args[0])
 		},
 	}
+
+	selectCommand.Flags().BoolVarP(&listTips, "tips", "t", false, "list tips")
+	selectCommand.Flags().BoolVarP(&listBranches, "branches", "b", false, "list branches")
+	selectCommand.Flags().BoolVarP(&listRemotes, "remotes", "r", false, "list remote branches or tips")
 
 	return selectCommand
 }
@@ -74,7 +87,7 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	amendCommand := &cobra.Command{
 		Use: "amend",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.AmendCommand(repo, message, os.OpenEditor)
+			return commands.AmendCommand(repo, message, env.OpenEditor)
 		},
 	}
 
