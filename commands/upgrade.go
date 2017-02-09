@@ -66,9 +66,11 @@ func UpgradeCommand(repo *git.Repository) error {
 		headCommit = newCommit
 	}
 
-	tailRef.SetTarget(baseCommit.Id(), "tie update")
+	tailRef.SetTarget(baseCommit.Id(), "tie upgrade")
 
 	repo.StateCleanup()
+
+	head, _ = repo.Head()
 
 	core.PushTip(repo, head)
 
