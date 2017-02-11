@@ -10,8 +10,8 @@ import (
 func TestDwim(t *testing.T) {
 	test.RunOnRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		repo.References.Create("refs/tips/origin/testorigin", head.Target(), true, "")
+		repo.References.Create(RefsTips+"test", head.Target(), true, "")
+		repo.References.Create(RefsRemoteTips+"origin/testorigin", head.Target(), true, "")
 		repo.References.Create("refs/remotes/origin/master", head.Target(), true, "")
 		repo.References.Create("refs/remotes/origin/testorigin", head.Target(), true, "")
 
@@ -59,11 +59,11 @@ func TestTipName(t *testing.T) {
 	assert.Equal(t, "", name)
 	assert.NotNil(t, err)
 
-	name, err = TipName("refs/tips/origin/test")
+	name, err = TipName(RefsRemoteTips + "origin/test")
 	assert.Equal(t, "", name)
 	assert.NotNil(t, err)
 
-	name, err = TipName("refs/tips/local/test")
+	name, err = TipName(RefsTips + "test")
 	assert.Equal(t, "test", name)
 	assert.Nil(t, err)
 }

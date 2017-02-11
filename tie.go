@@ -45,7 +45,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 
 func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 
-	var listTips, listBranches, listRemotes bool;
+	var listTips, listBranches, listRemotes bool
 
 	selectCommand := &cobra.Command{
 		Use: "select [flags] [<tip or branch>]",

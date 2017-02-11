@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -19,8 +20,8 @@ func TestUpgrade(t *testing.T) {
 
 	test.RunOnRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		SelectCommand(repo, "refs/tips/local/test")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		SelectCommand(repo, core.RefsTips+"test")
 
 		err := UpgradeCommand(repo)
 
@@ -31,15 +32,15 @@ func TestUpgrade(t *testing.T) {
 
 	test.RunOnRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		SelectCommand(repo, "refs/tips/local/test")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		SelectCommand(repo, core.RefsTips+"test")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		err := UpgradeCommand(repo)
 
 		if assert.NotNil(t, err) {
-			assert.Equal(t, "Reference 'refs/tails/test' not found", err.Error())
+			assert.Equal(t, "Reference '"+core.RefsTails+"test' not found", err.Error())
 		}
 	})
 
@@ -48,12 +49,12 @@ func TestUpgrade(t *testing.T) {
 		head, _ := repo.Head()
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		repo.References.Create("refs/tails/test", head.Target(), true, "")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
 
 		// make origin/master and the tip diverge.
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
-		SelectCommand(repo, "refs/tips/local/test")
+		SelectCommand(repo, core.RefsTips+"test")
 		now := time.Now()
 		signature := &git.Signature{
 			Name:  "user1",
@@ -83,14 +84,14 @@ func TestUpgrade(t *testing.T) {
 		assert.Equal(t, now.Unix(), headCommit.Author().When.Unix())
 
 		// we expect the tail to be updated on origin/master's target
-		newTailRef, _ := repo.References.Lookup("refs/tails/test")
+		newTailRef, _ := repo.References.Lookup(core.RefsTails + "test")
 		assert.Equal(t, 0, newTailRef.Target().Cmp(masterOid))
 
 		// the repo state should be clean
 		assert.Equal(t, git.RepositoryStateNone, repo.State())
 
 		// We expect the tip to be pushed on origin
-		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
+		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
 		}
@@ -101,13 +102,13 @@ func TestUpgrade(t *testing.T) {
 		head, _ := repo.Head()
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/heads/master")
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
-		repo.References.Create("refs/tails/test", head.Target(), true, "")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
 
 		// make master and the tip having a conflict.
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, nil)
-		SelectCommand(repo, "refs/tips/local/test")
+		SelectCommand(repo, core.RefsTips+"test")
 		test.WriteFile(repo, true, "foo", "line1 bis")
 		test.Commit(repo, nil)
 

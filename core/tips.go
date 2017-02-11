@@ -2,8 +2,8 @@ package core
 
 import (
 	"fmt"
-	"gopkg.in/libgit2/git2go.v25"
 	"github.com/apflieger/tie/env"
+	"gopkg.in/libgit2/git2go.v25"
 )
 
 func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.Commit, treeToCommit *git.Tree) {

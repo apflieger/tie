@@ -8,11 +8,17 @@ import (
 	"strings"
 )
 
+const (
+	RefsTips       = "refs/tips/local/"
+	RefsRemoteTips = "refs/tips/"
+	RefsTails      = "refs/tails/"
+)
+
 var refPatterns []string = []string{
 	"%v",
 	"refs/%v",
-	"refs/tips/local/%v",
-	"refs/tips/%v",
+	RefsTips + "%v",
+	RefsRemoteTips + "%v",
 	"refs/remotes/%v",
 }
 
@@ -32,10 +38,10 @@ func Dwim(repo *git.Repository, shorthand string) (*git.Reference, error) {
 }
 
 func TipName(refName string) (string, error) {
-	if !strings.HasPrefix(refName, "refs/tips/local/") {
+	if !strings.HasPrefix(refName, RefsTips) {
 		return "", errors.New("")
 	}
-	return strings.Replace(refName, "refs/tips/local/", "", 1), nil
+	return strings.Replace(refName, RefsTips, "", 1), nil
 }
 
 func RemoteName(ref string) (string, error) {

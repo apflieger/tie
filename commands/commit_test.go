@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -14,7 +15,7 @@ func TestCommit(t *testing.T) {
 
 		// create/select a tip
 		head, _ := repo.Head()
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
 		SelectCommand(repo, "test")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
@@ -37,7 +38,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, 0, statusCount)
 		assert.Nil(t, err)
 		// We expect the tip to be pushed on origin
-		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
+		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head2.Target()))
 		}
@@ -49,7 +50,7 @@ func TestCommit(t *testing.T) {
 
 		// create/select a tip
 		head, _ := repo.Head()
-		repo.References.Create("refs/tips/local/test", head.Target(), true, "")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
 		SelectCommand(repo, "test")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")

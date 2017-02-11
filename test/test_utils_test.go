@@ -1,11 +1,11 @@
 package test
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
 	"time"
-	"bytes"
 )
 
 func TestDumbForCodeCoverage(t *testing.T) {

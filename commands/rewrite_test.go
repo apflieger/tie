@@ -15,13 +15,13 @@ func TestRewrite(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
 			Message: "first commit",
-			Refname: "refs/tips/local/test",
+			Refname: core.RefsTips + "test",
 		})
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		// select the tip
-		repo.References.CreateSymbolic("HEAD", "refs/tips/local/test", true, "")
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
 		// change the file
 		test.WriteFile(repo, true, "foo", "line1 amended")
@@ -57,13 +57,13 @@ func TestRewrite(t *testing.T) {
 		assert.Equal(t, 2, logSize)
 
 		// We expect the tip to be pushed on origin
-		remoteTip, err := remote.References.Lookup("refs/tips/local/test")
+		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
 		}
 
 		// The local remote tip should be set as well
-		remoteTip, err = repo.References.Lookup("refs/tips/origin/test")
+		remoteTip, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
 		if assert.Nil(t, err) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
 		}
@@ -77,13 +77,13 @@ func TestRewrite(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
 			Message: "first commit",
-			Refname: "refs/tips/local/test",
+			Refname: core.RefsTips + "test",
 		})
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		// select the tip
-		repo.References.CreateSymbolic("HEAD", "refs/tips/local/test", true, "")
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
 		// change the file
 		test.WriteFile(repo, true, "foo", "line1 amended")

@@ -28,13 +28,13 @@ func TipCreateCommand(repo *git.Repository, name, base string) error {
 		}
 	}
 
-	tipRef, err := repo.References.Create(fmt.Sprintf("refs/tips/local/%v", name), baseRef.Target(), false, "tie tip create")
+	tipRef, err := repo.References.Create(core.RefsTips+name, baseRef.Target(), false, "tie tip create")
 
 	if err != nil {
 		return err
 	}
 
-	repo.References.Create(fmt.Sprintf("refs/tails/%v", name), baseRef.Target(), false, "tie tip create")
+	repo.References.Create(core.RefsTails+name, baseRef.Target(), false, "tie tip create")
 
 	repo.References.CreateSymbolic("HEAD", tipRef.Name(), true, "tie tip create")
 

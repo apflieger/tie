@@ -1,15 +1,15 @@
 package test
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"bytes"
-	"log"
 )
 
 /*

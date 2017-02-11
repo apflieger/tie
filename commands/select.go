@@ -28,13 +28,13 @@ func SelectCommand(repo *git.Repository, shorthand string) error {
 }
 
 func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remotes bool) error {
-	glob := "refs/tips/local/*"
+	glob := core.RefsTips + "*"
 	if remotes {
-		glob = "refs/tips/[!local]/*"
+		glob = core.RefsRemoteTips + "*"
 	}
 	it, _ := repo.NewReferenceIteratorGlob(glob)
 	names := it.Names()
-	for name, end := names.Next(); end == nil ; name, end = names.Next(){
+	for name, end := names.Next(); end == nil; name, end = names.Next() {
 		logger.Println(name)
 	}
 	return nil
