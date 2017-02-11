@@ -86,8 +86,14 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 		addGlob("refs/remotes/*")
 	}
 
+	head, _ := repo.Head()
+	directRef, _ := head.Resolve()
 	for _, ref := range list {
-		logger.Println(ref)
+		prefix := "  "
+		if ref == directRef.Name() {
+			prefix = "* "
+		}
+		logger.Println(prefix + ref)
 	}
 
 	return nil
