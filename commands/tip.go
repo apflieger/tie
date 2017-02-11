@@ -23,7 +23,7 @@ func TipCreateCommand(repo *git.Repository, name, base string) error {
 	}
 
 	if remote, err := core.RemoteName(baseRef.Name()); err == nil {
-		if _, err = repo.References.Lookup(fmt.Sprintf("refs/tips/%v/%v", remote, name)); err == nil {
+		if _, err = repo.References.Lookup(core.RefsRemoteTips + remote + "/" + name); err == nil {
 			return fmt.Errorf("Failed to create tip \"%v\". A tip with that name already exists on %v.", name, remote)
 		}
 	}

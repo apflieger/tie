@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	RefsTips       = "refs/tips/local/"
-	RefsRemoteTips = "refs/tips/"
+	RefsTips       = "refs/tips/"
+	RefsRemoteTips = "refs/rtips/"
 	RefsTails      = "refs/tails/"
 )
 

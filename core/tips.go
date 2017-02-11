@@ -34,7 +34,7 @@ func PushTip(repo *git.Repository, tip *git.Reference) {
 	remote.Push([]string{fmt.Sprintf("+%v:%v", tip.Name(), tip.Name())}, pushOptions)
 
 	// create the local remote ref
-	repo.References.Create(fmt.Sprintf("refs/tips/%v/%v", remoteName, tipName), tip.Target(), true, "push tip")
+	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
 
 	// handle branch compatibility mode
 	compat, _ := config.LookupBool("tie.pushTipsAsBranches")

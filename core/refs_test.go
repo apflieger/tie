@@ -22,15 +22,11 @@ func TestDwim(t *testing.T) {
 		}
 
 		ref, err = Dwim(repo, "test")
-		assert.Equal(t, "refs/tips/local/test", ref.Name())
+		assert.Equal(t, RefsTips+"test", ref.Name())
 		assert.Nil(t, err)
 
-		ref, err = Dwim(repo, "local/test")
-		assert.Equal(t, "refs/tips/local/test", ref.Name())
-		assert.Nil(t, err)
-
-		ref, err = Dwim(repo, "tips/local/test")
-		assert.Equal(t, "refs/tips/local/test", ref.Name())
+		ref, err = Dwim(repo, "tips/test")
+		assert.Equal(t, RefsTips+"test", ref.Name())
 		assert.Nil(t, err)
 
 		ref, err = Dwim(repo, "testorigin")
@@ -41,7 +37,11 @@ func TestDwim(t *testing.T) {
 		}
 
 		ref, err = Dwim(repo, "origin/testorigin")
-		assert.Equal(t, "refs/tips/origin/testorigin", ref.Name())
+		assert.Equal(t, RefsRemoteTips+"origin/testorigin", ref.Name())
+		assert.Nil(t, err)
+
+		ref, err = Dwim(repo, "rtips/origin/testorigin")
+		assert.Equal(t, RefsRemoteTips+"origin/testorigin", ref.Name())
 		assert.Nil(t, err)
 
 		ref, err = Dwim(repo, "origin/master")
