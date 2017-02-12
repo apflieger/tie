@@ -72,11 +72,18 @@ func TestRemoteName(t *testing.T) {
 	_, err := RemoteName("refs/heads/master")
 	assert.NotNil(t, err)
 
+	_, err = RemoteName(RefsTips+"otherTip")
+	assert.NotNil(t, err)
+
 	remote, err := RemoteName("refs/remotes/origin/master")
 	assert.Nil(t, err)
 	assert.Equal(t, "origin", remote)
 
 	remote, err = RemoteName("refs/remotes/origin/features/work")
+	assert.Nil(t, err)
+	assert.Equal(t, "origin", remote)
+
+	remote, err = RemoteName(RefsRemoteTips+"origin/work")
 	assert.Nil(t, err)
 	assert.Equal(t, "origin", remote)
 }

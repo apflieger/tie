@@ -44,11 +44,19 @@ func TipName(refName string) (string, error) {
 	return strings.Replace(refName, RefsTips, "", 1), nil
 }
 
+// Extracts the remote name of the ref that matches patterns refs/remotes/ or refs/rtips/
 func RemoteName(ref string) (string, error) {
-	regexp := regexp.MustCompile(`refs/remotes/([^/]*)/.*`)
-	matches := regexp.FindStringSubmatch(ref)
-	if len(matches) < 2 {
-		return "", fmt.Errorf("\"%v\" is not a remote branch.", ref)
+	remotesRegexp := regexp.MustCompile(`refs/remotes/([^/]*)/.*`)
+	matches := remotesRegexp.FindStringSubmatch(ref)
+	if len(matches) == 2 {
+		return matches[1], nil
 	}
-	return matches[1], nil
+
+	rtipsRegexp := regexp.MustCompile(RefsRemoteTips+`([^/]*)/.*`)
+	matches = rtipsRegexp.FindStringSubmatch(ref)
+	if len(matches) == 2 {
+		return matches[1], nil
+	}
+
+	return "", fmt.Errorf("\"%v\" is not a remote ref.", ref)
 }
