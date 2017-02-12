@@ -37,6 +37,24 @@ func TestPushTip(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
+	test.RunOnRepo(t, "NoRemote", func(t *testing.T, repo *git.Repository) {
+		// setup a tip based on refs/heads/master
+		head, _ := repo.Head()
+		tip, _ := repo.References.Create(RefsTips+"test", head.Target(), false, "")
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/heads/master")
+
+		// push the tip
+		err := PushTip(repo, tip)
+
+		// push should have failed
+		assert.NotNil(t, err)
+
+		// local repo should not have a remote tip
+		_, err = repo.References.Lookup(RefsRemoteTips + "origin/test")
+		assert.NotNil(t, err)
+	})
+
 	test.RunOnRemote(t, "BranchCompatibilityMode", func(t *testing.T, repo, remote *git.Repository) {
 		// configure the repo to branch compatibility mode
 		config, _ := repo.Config()

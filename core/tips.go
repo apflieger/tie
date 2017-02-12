@@ -15,12 +15,17 @@ func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.C
 	return head, headCommit, treeToCommit
 }
 
-func PushTip(repo *git.Repository, tip *git.Reference) {
+func PushTip(repo *git.Repository, tip *git.Reference) error {
 	// lookup the remote corresponding to the base of the tip
 	tipName, _ := TipName(tip.Name())
 	config, _ := repo.Config()
 	base, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
-	remoteName, _ := RemoteName(base)
+	remoteName, err := RemoteName(base)
+
+	if err != nil {
+		return err
+	}
+
 	remote, _ := repo.Remotes.Lookup(remoteName)
 
 	// push the tip on the remote
@@ -43,4 +48,6 @@ func PushTip(repo *git.Repository, tip *git.Reference) {
 		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", tip.Name(), tipName)}, pushOptions)
 		repo.References.Create(fmt.Sprintf("refs/remotes/%v/tips/%v", remoteName, tipName), tip.Target(), true, "push tip")
 	}
+
+	return nil
 }
