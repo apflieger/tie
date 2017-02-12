@@ -14,7 +14,7 @@ const (
 	RefsTails      = "refs/tails/"
 )
 
-var refPatterns []string = []string{
+var dwimPatterns []string = []string{
 	"%v",
 	"refs/%v",
 	RefsTips + "%v",
@@ -23,7 +23,7 @@ var refPatterns []string = []string{
 }
 
 func Dwim(repo *git.Repository, shorthand string) (*git.Reference, error) {
-	for _, refPattern := range refPatterns {
+	for _, refPattern := range dwimPatterns {
 		refname := fmt.Sprintf(refPattern, shorthand)
 
 		if git.ReferenceIsValidName(refname) {
@@ -52,7 +52,7 @@ func RemoteName(ref string) (string, error) {
 		return matches[1], nil
 	}
 
-	rtipsRegexp := regexp.MustCompile(RefsRemoteTips+`([^/]*)/.*`)
+	rtipsRegexp := regexp.MustCompile(RefsRemoteTips + `([^/]*)/.*`)
 	matches = rtipsRegexp.FindStringSubmatch(ref)
 	if len(matches) == 2 {
 		return matches[1], nil
