@@ -129,4 +129,42 @@ func TestUpgrade(t *testing.T) {
 			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
 	})
+
+	test.RunOnRemote(t, "UpgradeEmptyTip", func(t *testing.T, repo, remote *git.Repository) {
+		// create a tip on head based on origin/master
+		head, _ := repo.Head()
+		config, _ := repo.Config()
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
+		repo.References.Create("refs/remotes/origin/master", head.Target(), true, "")
+		config.SetString("tip.test.base", "refs/remotes/origin/master")
+		// select the tip
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
+
+		// Add a commit on origin/master
+		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
+		// then select the tip and commit
+
+		assert.NotEqual(t, 0, masterOid.Cmp(head.Target()))
+
+		// do the upgrade
+		err := UpgradeCommand(repo)
+
+		assert.Nil(t, err)
+
+		// the tip should be on masterOid
+		upgradedTip, _ := repo.References.Lookup(core.RefsTips + "test")
+		assert.Equal(t, 0, masterOid.Cmp(upgradedTip.Target()))
+
+		// the tail should be on masterOid too
+		upgradedTail, _ := repo.References.Lookup(core.RefsTails + "test")
+		assert.Equal(t, 0, masterOid.Cmp(upgradedTail.Target()))
+
+		// the tip shouldn't be pushed on origin since it is empty
+		_, err = remote.References.Lookup(core.RefsTips + "test")
+		assert.NotNil(t, err)
+
+		_, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
+		assert.NotNil(t, err)
+	})
 }

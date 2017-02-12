@@ -70,9 +70,10 @@ func UpgradeCommand(repo *git.Repository) error {
 
 	repo.StateCleanup()
 
-	head, _ = repo.Head()
-
-	core.PushTip(repo, head)
+	if len(cpCommitRange) > 0 {
+		head, _ = repo.Head()
+		core.PushTip(repo, head)
+	}
 
 	return nil
 }
