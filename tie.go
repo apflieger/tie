@@ -45,13 +45,13 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 
 func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 
-	var listTips, listBranches, listRemotes bool
+	var listTips, listBranches, listRemotes, listAll bool
 
 	selectCommand := &cobra.Command{
 		Use: "select [flags] [<tip or branch>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes)
+				return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes, listAll)
 			}
 			return commands.SelectCommand(repo, args[0])
 		},
@@ -60,6 +60,7 @@ func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command
 	selectCommand.Flags().BoolVarP(&listTips, "tips", "t", false, "list tips")
 	selectCommand.Flags().BoolVarP(&listBranches, "branches", "b", false, "list branches")
 	selectCommand.Flags().BoolVarP(&listRemotes, "remotes", "r", false, "list remote branches or tips")
+	selectCommand.Flags().BoolVarP(&listAll, "all", "a", false, "list tips and branches, local and remote")
 
 	return selectCommand
 }

@@ -89,7 +89,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "DefaultListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false, false)
 		assertRefsList(t, repo, logBuffer,
 			"refs/heads/master", // HEAD
 			core.RefsTips+"tip1",
@@ -100,7 +100,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "TipsListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, false)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, false, false)
 		assertRefsList(t, repo, logBuffer,
 			core.RefsTips+"tip1",
 			core.RefsTips+"tip2")
@@ -109,7 +109,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "BranchListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, false)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, false, false)
 		assertRefsList(t, repo, logBuffer,
 			"refs/heads/branch1",
 			"refs/heads/master")
@@ -118,7 +118,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "RemoteListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, true)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, true, false)
 		assertRefsList(t, repo, logBuffer,
 			core.RefsRemoteTips+"github/tip4",
 			core.RefsRemoteTips+"origin/tip3",
@@ -129,7 +129,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "RemoteTipsListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, true)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, true, false)
 		assertRefsList(t, repo, logBuffer,
 			core.RefsRemoteTips+"github/tip4",
 			core.RefsRemoteTips+"origin/tip3")
@@ -138,7 +138,7 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "RemoteBranchListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, true)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, true, false)
 		assertRefsList(t, repo, logBuffer,
 			"refs/remotes/github/branch3",
 			"refs/remotes/origin/branch2")
@@ -147,11 +147,26 @@ func TestList(t *testing.T) {
 	test.RunOnRepo(t, "LocalListing", func(t *testing.T, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
-		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, true, false)
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, true, false, false)
 		assertRefsList(t, repo, logBuffer,
 			core.RefsTips+"tip1",
 			core.RefsTips+"tip2",
 			"refs/heads/branch1",
 			"refs/heads/master")
+	})
+
+	test.RunOnRepo(t, "AllListing", func(t *testing.T, repo *git.Repository) {
+		setupRefs(repo)
+		var logBuffer *bytes.Buffer
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false, true)
+		assertRefsList(t, repo, logBuffer,
+			core.RefsTips+"tip1",
+			core.RefsTips+"tip2",
+			core.RefsRemoteTips+"github/tip4",
+			core.RefsRemoteTips+"origin/tip3",
+			"refs/heads/branch1",
+			"refs/heads/master",
+			"refs/remotes/github/branch3",
+			"refs/remotes/origin/branch2")
 	})
 }

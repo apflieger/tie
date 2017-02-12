@@ -27,7 +27,7 @@ func SelectCommand(repo *git.Repository, shorthand string) error {
 	return err
 }
 
-func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remotes bool) error {
+func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remotes, all bool) error {
 	list := []string{}
 
 	add := func(s string) {
@@ -48,7 +48,7 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 	}
 
 	// default listing
-	if !tips && !branches && !remotes {
+	if !all && !tips && !branches && !remotes {
 		// display HEAD direct ref first
 		head, _ := repo.Head()
 		directRef, _ := head.Resolve()
@@ -65,24 +65,19 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 		}
 	}
 
-	if tips && !remotes {
+	if all || (tips && !remotes) {
 		addGlob(core.RefsTips + "*")
 	}
 
-	if tips && remotes {
+	if all || (remotes && (tips || !branches)) {
 		addGlob(core.RefsRemoteTips + "*")
 	}
 
-	if branches && !remotes {
+	if all || (branches && !remotes) {
 		addGlob("refs/heads/*")
 	}
 
-	if branches && remotes {
-		addGlob("refs/remotes/*")
-	}
-
-	if remotes && !tips && !branches {
-		addGlob(core.RefsRemoteTips + "*")
+	if all || (remotes && (branches || !tips)) {
 		addGlob("refs/remotes/*")
 	}
 
