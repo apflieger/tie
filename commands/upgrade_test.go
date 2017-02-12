@@ -19,26 +19,32 @@ func TestUpgrade(t *testing.T) {
 	})
 
 	test.RunOnRepo(t, "NoBase", func(t *testing.T, repo *git.Repository) {
+		// create and select a tip
 		head, _ := repo.Head()
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		SelectCommand(repo, core.RefsTips+"test")
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
 		err := UpgradeCommand(repo)
 
+		// upgrade requires a base to be defined
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Config value 'tip.test.base' was not found", err.Error())
 		}
 	})
 
 	test.RunOnRepo(t, "NoTail", func(t *testing.T, repo *git.Repository) {
+		// create and select a tip
 		head, _ := repo.Head()
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		SelectCommand(repo, core.RefsTips+"test")
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
+
+		// configure the base of the tip
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
 		err := UpgradeCommand(repo)
 
+		// upgrade requires the tip to have a tail
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Reference '"+core.RefsTails+"test' not found", err.Error())
 		}
@@ -54,7 +60,7 @@ func TestUpgrade(t *testing.T) {
 
 		// make origin/master and the tip diverge.
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
-		SelectCommand(repo, core.RefsTips+"test")
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 		now := time.Now()
 		signature := &git.Signature{
 			Name:  "user1",
@@ -106,9 +112,14 @@ func TestUpgrade(t *testing.T) {
 		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
 
 		// make master and the tip having a conflict.
+		// first commit to head that is on master
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, nil)
-		SelectCommand(repo, core.RefsTips+"test")
+		// then select the tip and commit
+		firstCommit, _ := repo.LookupCommit(head.Target())
+		tree, _ := firstCommit.Tree()
+		repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutForce})
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 		test.WriteFile(repo, true, "foo", "line1 bis")
 		test.Commit(repo, nil)
 
