@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/apflieger/tie/commands"
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/env"
@@ -109,7 +110,19 @@ func buildTipCommand(repo *git.Repository) *cobra.Command {
 	createCommand := &cobra.Command{
 		Use: "create <tipName> [<base>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.TipCreateCommand(repo, args[0], args[1])
+			if len(args) < 1 {
+				return errors.New("Argument missing")
+			}
+
+			tipName := args[0]
+
+			base := ""
+
+			if len(args) > 1 {
+				base = args[1]
+			}
+
+			return commands.TipCreateCommand(repo, tipName, base)
 		},
 	}
 
