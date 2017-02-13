@@ -327,10 +327,10 @@
 		},
 		{
 			"importpath": "gopkg.in/libgit2/git2go.v25",
-			"repository": "https://gopkg.in/libgit2/git2go.v25",
+			"repository": "https://github.com/apflieger/git2go.git",
 			"vcs": "git",
-			"revision": "f0554d8c8b926ea3a5ba0f04ea3ed47a6a6882ba",
-			"branch": "v25",
+			"revision": "cc81abe49a7da627407bb550d5be564560298021",
+			"branch": "rebase-wrapper",
 			"notests": true
 		},
 		{

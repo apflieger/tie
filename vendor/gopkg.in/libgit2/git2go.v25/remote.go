@@ -734,11 +734,12 @@ func (o *Remote) Connect(direction ConnectDirection, callbacks *RemoteCallbacks,
 	var cproxy C.git_proxy_options
 	populateProxyOptions(&cproxy, proxyOpts)
 	defer freeProxyOptions(&cproxy)
-
+	
 	cheaders := C.git_strarray{}
 	cheaders.count = C.size_t(len(headers))
 	cheaders.strings = makeCStringsFromStrings(headers)
 	defer freeStrarray(&cheaders)
+
 
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
