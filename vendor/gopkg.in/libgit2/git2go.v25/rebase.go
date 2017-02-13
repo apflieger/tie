@@ -52,7 +52,7 @@ type RebaseOptions struct {
 }
 
 // DefaultRebaseOptions returns a RebaseOptions with default values.
-func DefaultRebaseOptions() (RebaseOptions, error) {
+func DefaultRebaseOptions() (*RebaseOptions, error) {
 	opts := C.git_rebase_options{}
 
 	runtime.LockOSThread()
@@ -60,13 +60,13 @@ func DefaultRebaseOptions() (RebaseOptions, error) {
 
 	ecode := C.git_rebase_init_options(&opts, C.GIT_REBASE_OPTIONS_VERSION)
 	if ecode < 0 {
-		return RebaseOptions{}, MakeGitError(ecode)
+		return &RebaseOptions{}, MakeGitError(ecode)
 	}
 	return rebaseOptionsFromC(&opts), nil
 }
 
-func rebaseOptionsFromC(opts *C.git_rebase_options) RebaseOptions {
-	return RebaseOptions{
+func rebaseOptionsFromC(opts *C.git_rebase_options) *RebaseOptions {
+	return &RebaseOptions{
 		Version:         uint(opts.version),
 		Quiet:           int(opts.quiet),
 		InMemory:        int(opts.inmemory),

@@ -329,7 +329,7 @@
 			"importpath": "gopkg.in/libgit2/git2go.v25",
 			"repository": "https://github.com/apflieger/git2go.git",
 			"vcs": "git",
-			"revision": "cc81abe49a7da627407bb550d5be564560298021",
+			"revision": "79d6f6c18c61894fd459c6312db419e4776702c7",
 			"branch": "rebase-wrapper",
 			"notests": true
 		},
