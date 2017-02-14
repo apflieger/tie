@@ -24,6 +24,7 @@ func UpgradeCommand(repo *git.Repository) error {
 	if err != nil {
 		return err
 	}
+	baseRef, _ := repo.References.Lookup(baseRefName)
 
 	tailRef, err := repo.References.Lookup(fmt.Sprintf("refs/tails/%v", tipName))
 
@@ -31,49 +32,34 @@ func UpgradeCommand(repo *git.Repository) error {
 		return err
 	}
 
-	tailOid := tailRef.Target()
+	annotatedHeadCommit, _ := repo.AnnotatedCommitFromRef(head)
+	annotatedUpstreamCommit, _ := repo.AnnotatedCommitFromRef(tailRef)
+	annotatedOntoCommit, _ := repo.AnnotatedCommitFromRef(baseRef)
 
-	cpCommitRange := []*git.Commit{}
+	rebaseOpts, _ := git.DefaultRebaseOptions()
 
-	for loopCommit, _ := repo.LookupCommit(head.Target()); loopCommit.Id().Cmp(tailOid) != 0; loopCommit = loopCommit.Parent(0) {
-		cpCommitRange = append(cpCommitRange, loopCommit)
-	}
+	rebase, _ := repo.InitRebase(annotatedHeadCommit, annotatedUpstreamCommit, annotatedOntoCommit, rebaseOpts)
 
-	for i := len(cpCommitRange)/2 - 1; i >= 0; i-- {
-		opp := len(cpCommitRange) - 1 - i
-		cpCommitRange[i], cpCommitRange[opp] = cpCommitRange[opp], cpCommitRange[i]
-	}
-
-	baseRef, _ := repo.References.Lookup(baseRefName)
-	baseCommit, _ := repo.LookupCommit(baseRef.Target())
-	repo.ResetToCommit(baseCommit, git.ResetHard, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
-
-	headCommit := baseCommit
-	for _, cpCommit := range cpCommitRange {
-		cherrypickOptions, _ := git.DefaultCherrypickOptions()
-		repo.Cherrypick(cpCommit, cherrypickOptions)
+	for operation, itErr := rebase.Next(); itErr == nil ; operation, itErr = rebase.Next() {
 		index, _ := repo.Index()
 		if index.HasConflicts() {
 			return errors.New("Conflict while upgrading")
 		}
-		index.Write()
-		treeObj, _ := index.WriteTree()
-		tree, _ := repo.LookupTree(treeObj)
-		author := cpCommit.Author()
-		committer := cpCommit.Committer()
-		newCommitOid, _ := repo.CreateCommit(head.Name(), author, committer, cpCommit.Message(), tree, headCommit)
-		newCommit, _ := repo.LookupCommit(newCommitOid)
-		headCommit = newCommit
+		commit, _ := repo.LookupCommit(operation.Id)
+		committer, _ := repo.DefaultSignature()
+		rebase.Commit(operation.Id, commit.Author(), committer, commit.Message())
 	}
 
-	tailRef.SetTarget(baseCommit.Id(), "tie upgrade")
+	rebase.Finish()
 
-	repo.StateCleanup()
+	tailRef.SetTarget(baseRef.Target(), "tie upgrade")
 
-	if len(cpCommitRange) > 0 {
+	if rebase.OperationCount() > 0 {
 		head, _ = repo.Head()
 		core.PushTip(repo, head)
 	}
+
+	rebase.Free()
 
 	return nil
 }
