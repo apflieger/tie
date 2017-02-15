@@ -82,7 +82,15 @@ func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 		},
 	}
 
+	continueCommand := &cobra.Command{
+		Use: "continue",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.UpgradeContinueCommand(repo)
+		},
+	}
+
 	upgradeCommand.AddCommand(abortCommand)
+	upgradeCommand.AddCommand(continueCommand)
 
 	return upgradeCommand
 }

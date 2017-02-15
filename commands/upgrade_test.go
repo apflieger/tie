@@ -139,8 +139,63 @@ func TestUpgrade(t *testing.T) {
 		assert.Equal(t, core.RefsTips+"test", head.Name())
 		assert.Equal(t, 0, head.Target().Cmp(oidBeforeUpgrade))
 		// tip's tail should be where it was
-		tail, _ := repo.References.Lookup(core.RefsTails+"test")
+		tail, _ := repo.References.Lookup(core.RefsTails + "test")
 		assert.Equal(t, 0, tail.Target().Cmp(tailBeforeUpgrade))
+	})
+
+	test.RunOnRemote(t, "ConflictContinue", func(t *testing.T, repo, remote *git.Repository) {
+		// create a tip on head based on master
+		head, _ := repo.Head()
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/heads/master")
+		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
+		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
+
+		// make master and the tip having a conflict.
+		// first commit to head that is on master
+		test.WriteFile(repo, true, "foo", "line1")
+		test.Commit(repo, nil)
+		// then select the tip and commit
+		firstCommit, _ := repo.LookupCommit(head.Target())
+		tree, _ := firstCommit.Tree()
+		repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutForce})
+		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
+		test.WriteFile(repo, true, "foo", "line1 bis")
+		test.Commit(repo, nil)
+
+		// do the upgrade
+		err := UpgradeCommand(repo)
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Conflict while upgrading", err.Error())
+		}
+
+		// file foo should be in conflict
+		index, _ := repo.Index()
+
+		_, err = index.GetConflict("foo")
+		assert.Nil(t, err, "File foo should be in conflict")
+
+		// resolve the conflict
+		test.WriteFile(repo, true, "foo", "line1 bis")
+
+		// continue the upgrade
+		err = UpgradeContinueCommand(repo)
+		assert.Nil(t, err)
+
+		// HEAD should be one commit ahead of master
+		head, _ = repo.Head()
+		master, _ := repo.References.Lookup("refs/heads/master")
+		masterOid := master.Target()
+		headCommit, _ := repo.LookupCommit(head.Target())
+		assert.Equal(t, 0, headCommit.Parent(0).Id().Cmp(masterOid))
+
+		// the tail should be on master's target
+		newTailRef, _ := repo.References.Lookup(core.RefsTails + "test")
+		assert.Equal(t, 0, newTailRef.Target().Cmp(masterOid))
+
+		// the repo state should be clean
+		assert.Equal(t, git.RepositoryStateNone, repo.State())
+
 	})
 
 	test.RunOnRemote(t, "UpgradeEmptyTip", func(t *testing.T, repo, remote *git.Repository) {
