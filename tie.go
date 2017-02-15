@@ -68,14 +68,23 @@ func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command
 
 func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 
-	upgrdeCommand := &cobra.Command{
+	upgradeCommand := &cobra.Command{
 		Use: "upgrade",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.UpgradeCommand(repo)
 		},
 	}
 
-	return upgrdeCommand
+	abortCommand := &cobra.Command{
+		Use: "abort",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.UpgradeAbortCommand(repo)
+		},
+	}
+
+	upgradeCommand.AddCommand(abortCommand)
+
+	return upgradeCommand
 }
 
 func buildRewriteCommand(repo *git.Repository) *cobra.Command {

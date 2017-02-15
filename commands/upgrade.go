@@ -63,3 +63,11 @@ func UpgradeCommand(repo *git.Repository) error {
 
 	return nil
 }
+
+func UpgradeAbortCommand(repo *git.Repository) error {
+	rebaseOpts, _ := git.DefaultRebaseOptions()
+	rebase, _ := repo.OpenRebase(rebaseOpts)
+	rebase.Abort()
+	rebase.Free()
+	return nil
+}
