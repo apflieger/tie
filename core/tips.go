@@ -1,9 +1,11 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
+	"strings"
 )
 
 func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.Commit, treeToCommit *git.Tree) {
@@ -50,4 +52,21 @@ func PushTip(repo *git.Repository, tip *git.Reference) error {
 	}
 
 	return nil
+}
+
+// Removes comments (#) and empty lines before/after the content
+func FormatCommitMessage(s string) string {
+	if s == "" {
+		return ""
+	}
+	trimmed := strings.Trim(s, " \n")
+	lines := strings.Split(trimmed, "\n")
+	buffer := new(bytes.Buffer)
+	for _, line := range lines {
+		if strings.HasPrefix(strings.TrimLeft(line, " "), "#") {
+			continue
+		}
+		buffer.WriteString(line + "\n")
+	}
+	return buffer.String()
 }

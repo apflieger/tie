@@ -27,7 +27,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.O
 	}
 
 	signature, _ := repo.DefaultSignature()
-	repo.CreateCommit(head.Name(), signature, signature, commitMessage, tree, headCommit)
+	repo.CreateCommit(head.Name(), signature, signature, core.FormatCommitMessage(commitMessage), tree, headCommit)
 
 	// push the tip on the remote corresponding to its base
 	core.PushTip(repo, head)

@@ -69,8 +69,8 @@ func TestRewrite(t *testing.T) {
 			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
 		}
 
-		// The commit message should be the same
-		assert.Equal(t, "first commit", headCommit.Message())
+		// The commit message should be the same but formatted
+		assert.Equal(t, "first commit\n", headCommit.Message())
 	})
 
 	test.RunOnRemote(t, "AmendHeadMessage", func(t *testing.T, repo, remote *git.Repository) {
@@ -99,7 +99,7 @@ func TestRewrite(t *testing.T) {
 		head, _ := repo.Head()
 		headCommit, _ := repo.LookupCommit(head.Target())
 
-		// The commit message should be the same
-		assert.Equal(t, "Commit message from mocked editor", headCommit.Message())
+		// The commit message should be the same but formatted
+		assert.Equal(t, "Commit message from mocked editor\n", headCommit.Message())
 	})
 }

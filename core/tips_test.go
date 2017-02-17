@@ -79,3 +79,20 @@ func TestPushTip(t *testing.T) {
 		assert.Nil(t, err)
 	})
 }
+
+func TestFormatCommitMessage(t *testing.T) {
+	assert.Equal(t, "", FormatCommitMessage(""))
+	assert.Equal(t, "test\n", FormatCommitMessage("test"))
+	assert.Equal(t, "test\n", FormatCommitMessage("test\n"))
+	assert.Equal(t, "test\n", FormatCommitMessage("test\n\n"))
+	assert.Equal(t, "test\n", FormatCommitMessage("\ntest"))
+	assert.Equal(t, "test\n", FormatCommitMessage("  \ntest"))
+	assert.Equal(t, "test\n\ntext bellow\n", FormatCommitMessage("test\n\ntext bellow"))
+	assert.Equal(t, "test\n  text bellow\n", FormatCommitMessage("test\n  text bellow")) // keep indentation
+	assert.Equal(t, "test test\nline2.\n", FormatCommitMessage("test test\nline2."))
+	assert.Equal(t, "", FormatCommitMessage("#comment"))
+	assert.Equal(t, "", FormatCommitMessage("#comment\n"))
+	assert.Equal(t, "test\n", FormatCommitMessage("test\n#comment"))
+	assert.Equal(t, "test\n", FormatCommitMessage("test\n #comment"))
+	assert.Equal(t, "test #not a comment\n", FormatCommitMessage("test #not a comment"))
+}

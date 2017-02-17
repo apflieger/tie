@@ -28,7 +28,7 @@ func TestCommit(t *testing.T) {
 		head2, _ := repo.Head()
 		newCommit, _ := repo.LookupCommit(head2.Target())
 		assert.Equal(t, 0, newCommit.Parent(0).Id().Cmp(head.Target()))
-		assert.Equal(t, "fix typo", newCommit.Message())
+		assert.Equal(t, "fix typo\n", newCommit.Message()) // commit message has been formatted
 		statusList, _ := repo.StatusList(
 			&git.StatusOptions{
 				Show:     git.StatusShowIndexAndWorkdir,
@@ -72,6 +72,6 @@ func TestCommit(t *testing.T) {
 		// We expect the commit message to be filled by the editor
 		head2, _ := repo.Head()
 		newCommit, _ := repo.LookupCommit(head2.Target())
-		assert.Equal(t, "Commit message from mocked editor", newCommit.Message())
+		assert.Equal(t, "Commit message from mocked editor\n", newCommit.Message()) // commit message has been formatted
 	})
 }
