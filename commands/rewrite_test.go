@@ -6,11 +6,12 @@ import (
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
+	"io/ioutil"
 	"testing"
 )
 
 func TestRewrite(t *testing.T) {
-	test.RunOnRemote(t, "AmendHead", func(t *testing.T, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "AmendHeadTree", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
@@ -72,11 +73,11 @@ func TestRewrite(t *testing.T) {
 		assert.Equal(t, "first commit", headCommit.Message())
 	})
 
-	test.RunOnRemote(t, "AmendHead", func(t *testing.T, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "AmendHeadMessage", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
-			Message: "first commit",
+			Message: "Commit message to be amended\nWith a 2nd line.",
 			Refname: core.RefsTips + "test",
 		})
 		config, _ := repo.Config()
@@ -85,16 +86,20 @@ func TestRewrite(t *testing.T) {
 		// select the tip
 		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
-		// change the file
-		test.WriteFile(repo, true, "foo", "line1 amended")
-
+		var presetCommitMessage string
 		// amend the last commit using tie rewrite amend -m
-		AmendCommand(repo, core.OptionWithoutValue, test.MockOpenEditor)
+		AmendCommand(repo, core.OptionWithoutValue, func(config *git.Config, file string) (string, error) {
+			bytes, _ := ioutil.ReadFile(file)
+			presetCommitMessage = string(bytes)
+			return "Commit message from mocked editor", nil
+		})
+
+		assert.Equal(t, "Commit message to be amended\nWith a 2nd line.", presetCommitMessage)
 
 		head, _ := repo.Head()
 		headCommit, _ := repo.LookupCommit(head.Target())
 
 		// The commit message should be the same
-		assert.Equal(t, "mocked file", headCommit.Message())
+		assert.Equal(t, "Commit message from mocked editor", headCommit.Message())
 	})
 }
