@@ -41,6 +41,8 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 
 	commitCommand.Flags().StringVarP(&message, "message", "m", "", "commit message")
 
+	commitCommand.Aliases = []string{"ci"}
+
 	return commitCommand
 }
 
@@ -62,6 +64,8 @@ func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command
 	selectCommand.Flags().BoolVarP(&listBranches, "branches", "b", false, "list branches")
 	selectCommand.Flags().BoolVarP(&listRemotes, "remotes", "r", false, "list remote branches or tips")
 	selectCommand.Flags().BoolVarP(&listAll, "all", "a", false, "list tips and branches, local and remote")
+
+	selectCommand.Aliases = []string{"sl"}
 
 	return selectCommand
 }
@@ -114,6 +118,8 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	amendCommand.Flag("message").NoOptDefVal = core.OptionWithoutValue
 
 	rewriteCommand.AddCommand(amendCommand)
+
+	rewriteCommand.Aliases = []string{"rw"}
 
 	return rewriteCommand
 }
