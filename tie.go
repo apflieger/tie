@@ -21,10 +21,11 @@ func main() {
 	logger := log.New(os.Stdout, "", 0)
 
 	rootCmd.AddCommand(buildCommitCommand(repo))
-	rootCmd.AddCommand(buildSelectCommand(repo, logger))
+	rootCmd.AddCommand(buildSelectCommand(repo))
 	rootCmd.AddCommand(buildUpgradeCommand(repo))
 	rootCmd.AddCommand(buildRewriteCommand(repo))
 	rootCmd.AddCommand(buildTipCommand(repo))
+	rootCmd.AddCommand(buildListCommand(repo, logger))
 
 	rootCmd.Execute()
 }
@@ -46,24 +47,14 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	return commitCommand
 }
 
-func buildSelectCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
-
-	var listTips, listBranches, listRemotes, listAll bool
+func buildSelectCommand(repo *git.Repository) *cobra.Command {
 
 	selectCommand := &cobra.Command{
-		Use: "select [flags] [<tip or branch>]",
+		Use: "select [<tip or branch>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes, listAll)
-			}
 			return commands.SelectCommand(repo, args[0])
 		},
 	}
-
-	selectCommand.Flags().BoolVarP(&listTips, "tips", "t", false, "list tips")
-	selectCommand.Flags().BoolVarP(&listBranches, "branches", "b", false, "list branches")
-	selectCommand.Flags().BoolVarP(&listRemotes, "remotes", "r", false, "list remote branches or tips")
-	selectCommand.Flags().BoolVarP(&listAll, "all", "a", false, "list tips and branches, local and remote")
 
 	selectCommand.Aliases = []string{"sl"}
 
@@ -152,4 +143,25 @@ func buildTipCommand(repo *git.Repository) *cobra.Command {
 	tipCommand.AddCommand(createCommand)
 
 	return tipCommand
+}
+
+func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
+
+	var listTips, listBranches, listRemotes, listAll bool
+
+	listCommand := &cobra.Command{
+		Use: "list",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes, listAll)
+		},
+	}
+
+	listCommand.Flags().BoolVarP(&listTips, "tips", "t", false, "list tips")
+	listCommand.Flags().BoolVarP(&listBranches, "branches", "b", false, "list branches")
+	listCommand.Flags().BoolVarP(&listRemotes, "remotes", "r", false, "list remote branches or tips")
+	listCommand.Flags().BoolVarP(&listAll, "all", "a", false, "list tips and branches, local and remote")
+
+	listCommand.Aliases = []string{"ls"}
+
+	return listCommand
 }
