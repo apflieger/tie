@@ -27,7 +27,7 @@ func TestCommit(t *testing.T) {
 		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
 		head2, _ := repo.Head()
 		newCommit, _ := repo.LookupCommit(head2.Target())
-		assert.Equal(t, 0, newCommit.Parent(0).Id().Cmp(head.Target()))
+		assert.True(t, newCommit.Parent(0).Id().Equal(head.Target()))
 		assert.Equal(t, "fix typo\n", newCommit.Message()) // commit message has been formatted
 		statusList, _ := repo.StatusList(
 			&git.StatusOptions{
@@ -41,7 +41,7 @@ func TestCommit(t *testing.T) {
 		// We expect the tip to be pushed on origin
 		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
-			assert.Equal(t, 0, remoteTip.Target().Cmp(head2.Target()))
+			assert.True(t, remoteTip.Target().Equal(head2.Target()))
 		}
 	})
 

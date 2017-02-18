@@ -47,7 +47,7 @@ func TestCommit(t *testing.T) {
 
 		// HEAD should point to the new commit
 		head, _ := repo.Head()
-		assert.Equal(t, 0, oid.Cmp(head.Target()))
+		assert.True(t, oid.Equal(head.Target()))
 
 		commit, _ := repo.LookupCommit(oid)
 
@@ -69,14 +69,14 @@ func TestCommit(t *testing.T) {
 		head, _ := repo.Head()
 
 		// HEAD shouldn't have changed
-		assert.Equal(t, 0, headBefore.Target().Cmp(head.Target()))
+		assert.True(t, headBefore.Target().Equal(head.Target()))
 
 		commit, _ := repo.LookupCommit(oid)
 
 		// the ref should exist and point to the new commit with HEAD as parent
 		ref, _ := repo.References.Lookup("refs/heads/test")
-		assert.Equal(t, 0, oid.Cmp(ref.Target()))
-		assert.Equal(t, 0, commit.Parent(0).Id().Cmp(head.Target()))
+		assert.True(t, oid.Equal(ref.Target()))
+		assert.True(t, commit.Parent(0).Id().Equal(head.Target()))
 
 		defaultSignature, _ := repo.DefaultSignature()
 

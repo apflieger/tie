@@ -60,13 +60,13 @@ func TestRewrite(t *testing.T) {
 		// We expect the tip to be pushed on origin
 		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
-			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+			assert.True(t, remoteTip.Target().Equal(head.Target()))
 		}
 
 		// The local remote tip should be set as well
 		remoteTip, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
 		if assert.Nil(t, err) {
-			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+			assert.True(t, remoteTip.Target().Equal(head.Target()))
 		}
 
 		// The commit message should be the same but formatted

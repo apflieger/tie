@@ -83,7 +83,7 @@ func TestUpgrade(t *testing.T) {
 		// we expect the tip to be on top of origin/master
 		head, _ = repo.Head()
 		headCommit, _ := repo.LookupCommit(head.Target())
-		assert.Equal(t, 0, headCommit.Parent(0).Parent(0).Id().Cmp(masterOid))
+		assert.True(t, headCommit.Parent(0).Parent(0).Id().Equal(masterOid))
 		assert.Equal(t, "last commit", headCommit.Message())
 		assert.Equal(t, "user1", headCommit.Author().Name)
 		assert.Equal(t, "email@example.com", headCommit.Author().Email)
@@ -91,7 +91,7 @@ func TestUpgrade(t *testing.T) {
 
 		// we expect the tail to be updated on origin/master's target
 		newTailRef, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, newTailRef.Target().Cmp(masterOid))
+		assert.True(t, newTailRef.Target().Equal(masterOid))
 
 		// the repo state should be clean
 		assert.Equal(t, git.RepositoryStateNone, repo.State())
@@ -99,7 +99,7 @@ func TestUpgrade(t *testing.T) {
 		// We expect the tip to be pushed on origin
 		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
-			assert.Equal(t, 0, remoteTip.Target().Cmp(head.Target()))
+			assert.True(t, remoteTip.Target().Equal(head.Target()))
 		}
 	})
 
@@ -137,10 +137,10 @@ func TestUpgrade(t *testing.T) {
 		// HEAD should be back to where it was
 		head, _ = repo.Head()
 		assert.Equal(t, core.RefsTips+"test", head.Name())
-		assert.Equal(t, 0, head.Target().Cmp(oidBeforeUpgrade))
+		assert.True(t, head.Target().Equal(oidBeforeUpgrade))
 		// tip's tail should be where it was
 		tail, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, tail.Target().Cmp(tailBeforeUpgrade))
+		assert.True(t, tail.Target().Equal(tailBeforeUpgrade))
 	})
 
 	test.RunOnRemote(t, "ConflictContinue", func(t *testing.T, repo, remote *git.Repository) {
@@ -187,11 +187,11 @@ func TestUpgrade(t *testing.T) {
 		master, _ := repo.References.Lookup("refs/heads/master")
 		masterOid := master.Target()
 		headCommit, _ := repo.LookupCommit(head.Target())
-		assert.Equal(t, 0, headCommit.Parent(0).Id().Cmp(masterOid))
+		assert.True(t, headCommit.Parent(0).Id().Equal(masterOid))
 
 		// the tail should be on master's target
 		newTailRef, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, newTailRef.Target().Cmp(masterOid))
+		assert.True(t, newTailRef.Target().Equal(masterOid))
 
 		// the repo state should be clean
 		assert.Equal(t, git.RepositoryStateNone, repo.State())
@@ -213,7 +213,7 @@ func TestUpgrade(t *testing.T) {
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
 		// then select the tip and commit
 
-		assert.NotEqual(t, 0, masterOid.Cmp(head.Target()))
+		assert.False(t, masterOid.Equal(head.Target()))
 
 		// do the upgrade
 		err := UpgradeCommand(repo)
@@ -222,11 +222,11 @@ func TestUpgrade(t *testing.T) {
 
 		// the tip should be on masterOid
 		upgradedTip, _ := repo.References.Lookup(core.RefsTips + "test")
-		assert.Equal(t, 0, masterOid.Cmp(upgradedTip.Target()))
+		assert.True(t, masterOid.Equal(upgradedTip.Target()))
 
 		// the tail should be on masterOid too
 		upgradedTail, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, masterOid.Cmp(upgradedTail.Target()))
+		assert.True(t, masterOid.Equal(upgradedTail.Target()))
 
 		// the tip shouldn't be pushed on origin since it is empty
 		_, err = remote.References.Lookup(core.RefsTips + "test")

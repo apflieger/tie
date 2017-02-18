@@ -24,7 +24,7 @@ func TestTipCreate(t *testing.T) {
 
 		// tail should be on head's target
 		tail, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, tail.Target().Cmp(head.Target()))
+		assert.True(t, tail.Target().Equal(head.Target()))
 	})
 
 	test.RunOnRepo(t, "OnOtherBranch", func(t *testing.T, repo *git.Repository) {
@@ -46,7 +46,7 @@ func TestTipCreate(t *testing.T) {
 		head, _ := repo.Head()
 		assert.Equal(t, core.RefsTips+"test", head.Name())
 		// head should point to origin/master's commit
-		assert.Equal(t, 0, oid.Cmp(head.Target()))
+		assert.True(t, oid.Equal(head.Target()))
 
 		// tip base should be on origin/master
 		config, _ := repo.Config()
@@ -55,7 +55,7 @@ func TestTipCreate(t *testing.T) {
 
 		// tail should be on origin/master's target
 		tail, _ := repo.References.Lookup(core.RefsTails + "test")
-		assert.Equal(t, 0, tail.Target().Cmp(oid))
+		assert.True(t, tail.Target().Equal(oid))
 	})
 
 	test.RunOnRepo(t, "LocalTipAlreadyExists", func(t *testing.T, repo *git.Repository) {
