@@ -59,8 +59,7 @@ func UpgradeCommand(repo *git.Repository) error {
 	tailRef.SetTarget(baseRef.Target(), "tie upgrade")
 
 	if rebase.OperationCount() > 0 {
-		head, _ = repo.Head()
-		core.PushTip(repo, head)
+		core.PushTip(repo, tipName)
 	}
 
 	rebase.Free()

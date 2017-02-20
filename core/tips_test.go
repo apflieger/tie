@@ -25,27 +25,33 @@ func TestPushTip(t *testing.T) {
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
+		oid, _ := test.Commit(repo, &test.CommitParams{
+			Refname: tip.Name(),
+		})
+
 		// push the tip
-		PushTip(repo, tip)
+		PushTip(repo, "test")
 
 		// local repo should have a remote tip
-		_, err := repo.References.Lookup(RefsRemoteTips + "origin/test")
+		rtip, err := repo.References.Lookup(RefsRemoteTips + "origin/test")
 		assert.Nil(t, err)
+		assert.True(t, rtip.Target().Equal(oid))
 
 		// remote repo should have a local tip
-		_, err = remote.References.Lookup(RefsTips + "test")
+		originTip, err := remote.References.Lookup(RefsTips + "test")
 		assert.Nil(t, err)
+		assert.True(t, originTip.Target().Equal(oid))
 	})
 
 	test.RunOnRepo(t, "NoRemote", func(t *testing.T, repo *git.Repository) {
 		// setup a tip based on refs/heads/master
 		head, _ := repo.Head()
-		tip, _ := repo.References.Create(RefsTips+"test", head.Target(), false, "")
+		repo.References.Create(RefsTips+"test", head.Target(), false, "")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/heads/master")
 
 		// push the tip
-		err := PushTip(repo, tip)
+		err := PushTip(repo, "test")
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -65,18 +71,23 @@ func TestPushTip(t *testing.T) {
 		tip, _ := repo.References.Create(RefsTips+"test", head.Target(), false, "")
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
-		// push the tip
-		PushTip(repo, tip)
+		oid, _ := test.Commit(repo, &test.CommitParams{
+			Refname: tip.Name(),
+		})
 
-		var err error
+		// push the tip
+		err := PushTip(repo, "test")
+		assert.Nil(t, err)
 
 		// local repo should have a remote branch corresponding to the tip
-		_, err = repo.References.Lookup("refs/remotes/origin/tips/test")
+		rBranch, err := repo.References.Lookup("refs/remotes/origin/tips/test")
 		assert.Nil(t, err)
+		assert.True(t, rBranch.Target().Equal(oid))
 
 		// remote repo should have a local branch corresponding to the tip
-		_, err = remote.References.Lookup("refs/heads/tips/test")
+		originBranch, err := remote.References.Lookup("refs/heads/tips/test")
 		assert.Nil(t, err)
+		assert.True(t, originBranch.Target().Equal(oid))
 	})
 }
 

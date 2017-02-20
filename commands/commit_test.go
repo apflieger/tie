@@ -23,6 +23,7 @@ func TestCommit(t *testing.T) {
 
 		// tie commit -m "fix typo"
 		err := CommitCommand(repo, "fix typo", nil)
+		assert.Nil(t, err)
 
 		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
 		head2, _ := repo.Head()
@@ -37,11 +38,16 @@ func TestCommit(t *testing.T) {
 			})
 		statusCount, _ := statusList.EntryCount()
 		assert.Equal(t, 0, statusCount)
-		assert.Nil(t, err)
+
 		// We expect the tip to be pushed on origin
 		remoteTip, err := remote.References.Lookup(core.RefsTips + "test")
 		if assert.Nil(t, err) {
 			assert.True(t, remoteTip.Target().Equal(head2.Target()))
+		}
+		// rtip should be on the same oid
+		rtip, err := repo.References.Lookup(core.RefsRemoteTips + "origin/test")
+		if assert.Nil(t, err) {
+			assert.True(t, rtip.Target().Equal(head2.Target()))
 		}
 	})
 

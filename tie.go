@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/apflieger/tie/commands"
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/env"
@@ -9,13 +10,12 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"os"
-	"fmt"
 )
 
 func main() {
 	logger := log.New(os.Stdout, "", 0)
 
-	path, err := git.Discover(".", false, nil);
+	path, err := git.Discover(".", false, nil)
 
 	if err != nil {
 		fmt.Println(err.Error())

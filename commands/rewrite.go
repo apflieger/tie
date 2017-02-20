@@ -26,8 +26,8 @@ func AmendCommand(repo *git.Repository, commitMessage string, openEditor core.Op
 
 	_, err := headCommit.Amend(head.Name(), headCommit.Author(), committer, core.FormatCommitMessage(commitMessage), tree)
 
-	head, _ = repo.Head()
-	core.PushTip(repo, head)
+	tipName, _ := core.TipName(head.Name())
+	core.PushTip(repo, tipName)
 
 	return err
 }

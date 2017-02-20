@@ -17,9 +17,8 @@ func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.C
 	return head, headCommit, treeToCommit
 }
 
-func PushTip(repo *git.Repository, tip *git.Reference) error {
+func PushTip(repo *git.Repository, tipName string) error {
 	// lookup the remote corresponding to the base of the tip
-	tipName, _ := TipName(tip.Name())
 	config, _ := repo.Config()
 	base, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
 	remoteName, err := RemoteName(base)
@@ -38,7 +37,9 @@ func PushTip(repo *git.Repository, tip *git.Reference) error {
 		},
 	}
 
-	remote.Push([]string{fmt.Sprintf("+%v:%v", tip.Name(), tip.Name())}, pushOptions)
+	tip, _ := repo.References.Lookup(RefsTips + tipName)
+
+	remote.Push([]string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}, pushOptions)
 
 	// create the local remote ref
 	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
@@ -47,7 +48,7 @@ func PushTip(repo *git.Repository, tip *git.Reference) error {
 	compat, _ := config.LookupBool("tie.pushTipsAsBranches")
 
 	if compat {
-		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", tip.Name(), tipName)}, pushOptions)
+		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName)}, pushOptions)
 		repo.References.Create(fmt.Sprintf("refs/remotes/%v/tips/%v", remoteName, tipName), tip.Target(), true, "push tip")
 	}
 

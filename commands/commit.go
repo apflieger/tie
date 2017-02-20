@@ -11,6 +11,7 @@ import (
 
 func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
+	tipName, _ := core.TipName(head.Name())
 
 	if commitMessage == "" {
 		linesRegexp := regexp.MustCompile(`(.*)`)
@@ -29,8 +30,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.O
 	signature, _ := repo.DefaultSignature()
 	repo.CreateCommit(head.Name(), signature, signature, core.FormatCommitMessage(commitMessage), tree, headCommit)
 
-	// push the tip on the remote corresponding to its base
-	core.PushTip(repo, head)
+	core.PushTip(repo, tipName)
 
 	return nil
 }
