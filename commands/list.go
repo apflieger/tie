@@ -4,6 +4,7 @@ import (
 	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
+	"sort"
 )
 
 func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remotes, all bool) error {
@@ -21,7 +22,18 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 	addGlob := func(glob string) {
 		it, _ := repo.NewReferenceIteratorGlob(glob)
 		names := it.Names()
+		sublist := []string{}
 		for name, end := names.Next(); end == nil; name, end = names.Next() {
+			sublist = append(sublist, name)
+		}
+
+		// sublist is a concatenation of file system based refs and packed ref.
+		// Both of these listings are seperatly sorted but the concatenation
+		// is not. This behaviour is not easily testable because libgit2 doesn't
+		// allow to pack refs.
+		sort.Strings(sublist)
+
+		for _, name := range sublist {
 			add(name)
 		}
 	}
@@ -62,6 +74,7 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 
 	head, _ := repo.Head()
 	directRef, _ := head.Resolve()
+
 	for _, ref := range list {
 		prefix := "  "
 		if ref == directRef.Name() {
