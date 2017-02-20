@@ -9,16 +9,27 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"os"
+	"fmt"
 )
 
 func main() {
-	repo, _ := git.OpenRepository(".")
+	logger := log.New(os.Stdout, "", 0)
+
+	path, err := git.Discover(".", false, nil);
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	repo, err := git.OpenRepository(path)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
 	var rootCmd = &cobra.Command{
 		SilenceUsage: true,
 	}
-
-	logger := log.New(os.Stdout, "", 0)
 
 	rootCmd.AddCommand(buildCommitCommand(repo))
 	rootCmd.AddCommand(buildSelectCommand(repo))
