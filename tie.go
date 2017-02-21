@@ -37,6 +37,7 @@ func main() {
 	rootCmd.AddCommand(buildRewriteCommand(repo))
 	rootCmd.AddCommand(buildTipCommand(repo))
 	rootCmd.AddCommand(buildListCommand(repo, logger))
+	rootCmd.AddCommand(buildDeleteCommand(repo, logger))
 
 	rootCmd.Execute()
 }
@@ -59,7 +60,6 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 }
 
 func buildSelectCommand(repo *git.Repository) *cobra.Command {
-
 	selectCommand := &cobra.Command{
 		Use: "select [<tip or branch>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -73,7 +73,6 @@ func buildSelectCommand(repo *git.Repository) *cobra.Command {
 }
 
 func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
-
 	upgradeCommand := &cobra.Command{
 		Use: "upgrade",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -102,7 +101,6 @@ func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 }
 
 func buildRewriteCommand(repo *git.Repository) *cobra.Command {
-
 	rewriteCommand := &cobra.Command{
 		Use: "rewrite",
 	}
@@ -127,7 +125,6 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 }
 
 func buildTipCommand(repo *git.Repository) *cobra.Command {
-
 	tipCommand := &cobra.Command{
 		Use: "tip",
 	}
@@ -157,7 +154,6 @@ func buildTipCommand(repo *git.Repository) *cobra.Command {
 }
 
 func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
-
 	var listTips, listBranches, listRemotes, listAll bool
 
 	listCommand := &cobra.Command{
@@ -175,4 +171,15 @@ func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 	listCommand.Aliases = []string{"ls"}
 
 	return listCommand
+}
+
+func buildDeleteCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
+	deleteCommand := &cobra.Command{
+		Use: "delete",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return commands.DeleteCommand(repo, logger, args)
+		},
+	}
+
+	return deleteCommand
 }
