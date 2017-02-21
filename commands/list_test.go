@@ -125,4 +125,26 @@ func TestList(t *testing.T) {
 			"refs/remotes/github/branch3",
 			"refs/remotes/origin/branch2")
 	})
+
+	test.RunOnRepo(t, "AllTipsListing", func(t *testing.T, repo *git.Repository) {
+		setupRefs(repo)
+		var logBuffer *bytes.Buffer
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, false, true)
+		assertRefsList(t, repo, logBuffer,
+			core.RefsTips+"tip1",
+			core.RefsTips+"tip2",
+			core.RefsRemoteTips+"github/tip4",
+			core.RefsRemoteTips+"origin/tip3")
+	})
+
+	test.RunOnRepo(t, "AllBranchesListing", func(t *testing.T, repo *git.Repository) {
+		setupRefs(repo)
+		var logBuffer *bytes.Buffer
+		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, false, true)
+		assertRefsList(t, repo, logBuffer,
+			"refs/heads/branch1",
+			"refs/heads/master",
+			"refs/remotes/github/branch3",
+			"refs/remotes/origin/branch2")
+	})
 }

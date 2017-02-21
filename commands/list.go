@@ -56,19 +56,22 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 		}
 	}
 
-	if all || (tips && !remotes) {
+	// These logic conditions required Karnaugh maps.
+	// They don't mean to be easily understandable
+
+	if (!remotes && tips) || (!branches && !remotes && all) {
 		addGlob(core.RefsTips + "*")
 	}
 
-	if all || (remotes && (tips || !branches)) {
+	if (remotes || all) && (tips || !branches) {
 		addGlob(core.RefsRemoteTips + "*")
 	}
 
-	if all || (branches && !remotes) {
+	if (!remotes && branches) || (!tips && !remotes && all) {
 		addGlob("refs/heads/*")
 	}
 
-	if all || (remotes && (branches || !tips)) {
+	if (remotes || all) && (branches || !tips) {
 		addGlob("refs/remotes/*")
 	}
 
