@@ -46,7 +46,8 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	var message string
 
 	commitCommand := &cobra.Command{
-		Use: "commit",
+		Use:   "commit",
+		Short: "Record changes in the currently selected tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.CommitCommand(repo, message, env.OpenEditor)
 		},
@@ -61,7 +62,8 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 
 func buildSelectCommand(repo *git.Repository) *cobra.Command {
 	selectCommand := &cobra.Command{
-		Use: "select [<tip or branch>]",
+		Use:   "select [<tip or branch>]",
+		Short: "Switch the repository on the given tip or branch",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.SelectCommand(repo, args[0])
 		},
@@ -74,7 +76,8 @@ func buildSelectCommand(repo *git.Repository) *cobra.Command {
 
 func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 	upgradeCommand := &cobra.Command{
-		Use: "upgrade",
+		Use:   "upgrade",
+		Short: "Get the current tip up-to-date with it's base",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.UpgradeCommand(repo)
 		},
@@ -102,13 +105,15 @@ func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 
 func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	rewriteCommand := &cobra.Command{
-		Use: "rewrite",
+		Short: "Allow to edit, reword or reorder current tip's commits",
+		Use:   "rewrite",
 	}
 
 	var message string
 
 	amendCommand := &cobra.Command{
-		Use: "amend",
+		Use:   "amend",
+		Short: "Meld changes into the previous commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.AmendCommand(repo, message, env.OpenEditor)
 		},
@@ -126,7 +131,8 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 
 func buildCreateCommand(repo *git.Repository) *cobra.Command {
 	createCommand := &cobra.Command{
-		Use: "create <tipName> [<base>]",
+		Use:   "create <tipName> [<base>]",
+		Short: "Create a tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return errors.New("Argument missing")
@@ -151,7 +157,8 @@ func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 	var listTips, listBranches, listRemotes, listAll bool
 
 	listCommand := &cobra.Command{
-		Use: "list",
+		Use:   "list",
+		Short: "List tips and branches",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.ListCommand(repo, logger, listTips, listBranches, listRemotes, listAll)
 		},
@@ -169,7 +176,8 @@ func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 
 func buildDeleteCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 	deleteCommand := &cobra.Command{
-		Use: "delete",
+		Use:   "delete",
+		Short: "Delete tips",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.DeleteCommand(repo, logger, args)
 		},
