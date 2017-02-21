@@ -59,10 +59,6 @@ func PushTip(repo *git.Repository, tipName string) error {
 
 	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
 
-	if compat {
-		repo.References.Create(fmt.Sprintf("refs/remotes/%v/tips/%v", remoteName, tipName), tip.Target(), true, "push tip")
-	}
-
 	return nil
 }
 
