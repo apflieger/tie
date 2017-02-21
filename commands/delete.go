@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 )
@@ -25,8 +26,36 @@ func DeleteCommand(repo *git.Repository, logger *log.Logger, refs []string) erro
 		base, _ := config.LookupString(baseKey)
 		config.Delete(baseKey)
 
-		git.ShortenOids([]*git.Oid{tip.Target(), tail.Target()}, 8)
-		logger.Printf("Deleted tip %v (%v..%v) based on %v", tipName, tail.Target().String(), tip.Target().String(), base)
+		remoteName, err := core.RemoteName(base)
+
+		if err == nil {
+			remote, _ := repo.Remotes.Lookup(remoteName)
+			pushOptions := &git.PushOptions{
+				RemoteCallbacks: git.RemoteCallbacks{
+					CredentialsCallback:      env.CredentialCallback,
+					CertificateCheckCallback: env.CertificateCheckCallback,
+				},
+			}
+			refspecs := []string{":" + ref}
+
+			compat, _ := config.LookupBool("tie.pushTipsAsBranches")
+
+			if compat {
+				refspecs = append(refspecs, ":refs/heads/tips/"+tipName)
+			}
+
+			err := remote.Push(refspecs, pushOptions)
+
+			if err == nil {
+				rtip, _ := repo.References.Lookup(core.RefsRemoteTips + remoteName + "/" + tipName)
+				rtip.Delete()
+			} else {
+				logger.Println(err.Error())
+				logger.Printf("Tip %v has been locally deleted but is still on %v\n", tipName, remoteName)
+			}
+		}
+
+		logger.Printf("Deleted tip %v", tipName)
 	}
 	return nil
 }

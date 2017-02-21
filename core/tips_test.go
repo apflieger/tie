@@ -85,6 +85,7 @@ func TestPushTip(t *testing.T) {
 		repo.References.Create(RefsTips+"test", head.Target(), false, "")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
+		// create an unreachable origin remote
 		repo.Remotes.Create("origin", "/dev/null")
 
 		// push the tip
