@@ -27,7 +27,11 @@ func PushTip(repo *git.Repository, tipName string) error {
 		return err
 	}
 
-	remote, _ := repo.Remotes.Lookup(remoteName)
+	remote, err := repo.Remotes.Lookup(remoteName)
+
+	if err != nil {
+		return err
+	}
 
 	// push the tip on the remote
 	pushOptions := &git.PushOptions{
@@ -47,7 +51,11 @@ func PushTip(repo *git.Repository, tipName string) error {
 		refspecs = append(refspecs, fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName))
 	}
 
-	remote.Push(refspecs, pushOptions)
+	err = remote.Push(refspecs, pushOptions)
+
+	if err != nil {
+		return err
+	}
 
 	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
 

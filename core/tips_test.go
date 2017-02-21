@@ -43,12 +43,49 @@ func TestPushTip(t *testing.T) {
 		assert.True(t, originTip.Target().Equal(oid))
 	})
 
-	test.RunOnRepo(t, "NoRemote", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "BaseNotRemote", func(t *testing.T, repo *git.Repository) {
 		// setup a tip based on refs/heads/master
 		head, _ := repo.Head()
 		repo.References.Create(RefsTips+"test", head.Target(), false, "")
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/heads/master")
+
+		// push the tip
+		err := PushTip(repo, "test")
+
+		// push should have failed
+		assert.NotNil(t, err)
+
+		// local repo should not have a remote tip
+		_, err = repo.References.Lookup(RefsRemoteTips + "origin/test")
+		assert.NotNil(t, err)
+	})
+
+	test.RunOnRepo(t, "RemoteDoesntExists", func(t *testing.T, repo *git.Repository) {
+		// setup a tip based on refs/remotes/somewhere/master
+		head, _ := repo.Head()
+		repo.References.Create(RefsTips+"test", head.Target(), false, "")
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/remotes/somewhere/master")
+
+		// push the tip
+		err := PushTip(repo, "test")
+
+		// push should have failed
+		assert.NotNil(t, err)
+
+		// local repo should not have a remote tip
+		_, err = repo.References.Lookup(RefsRemoteTips + "somewhere/test")
+		assert.NotNil(t, err)
+	})
+
+	test.RunOnRepo(t, "RemoteUnreachable", func(t *testing.T, repo *git.Repository) {
+		// setup a tip based on refs/remotes/origin/master
+		head, _ := repo.Head()
+		repo.References.Create(RefsTips+"test", head.Target(), false, "")
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/remotes/origin/master")
+		repo.Remotes.Create("origin", "/dev/null")
 
 		// push the tip
 		err := PushTip(repo, "test")
