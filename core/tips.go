@@ -38,17 +38,20 @@ func PushTip(repo *git.Repository, tipName string) error {
 	}
 
 	tip, _ := repo.References.Lookup(RefsTips + tipName)
-
-	remote.Push([]string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}, pushOptions)
-
-	// create the local remote ref
-	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
+	refspecs := []string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}
 
 	// handle branch compatibility mode
 	compat, _ := config.LookupBool("tie.pushTipsAsBranches")
 
 	if compat {
-		remote.Push([]string{fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName)}, pushOptions)
+		refspecs = append(refspecs, fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName))
+	}
+
+	remote.Push(refspecs, pushOptions)
+
+	repo.References.Create(RefsRemoteTips+remoteName+"/"+tipName, tip.Target(), true, "push tip")
+
+	if compat {
 		repo.References.Create(fmt.Sprintf("refs/remotes/%v/tips/%v", remoteName, tipName), tip.Target(), true, "push tip")
 	}
 
