@@ -6,7 +6,7 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-func TipCreateCommand(repo *git.Repository, name, base string) error {
+func CreateCommand(repo *git.Repository, name, base string) error {
 	var baseRef *git.Reference
 
 	if len(base) == 0 {

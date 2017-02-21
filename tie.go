@@ -35,7 +35,7 @@ func main() {
 	rootCmd.AddCommand(buildSelectCommand(repo))
 	rootCmd.AddCommand(buildUpgradeCommand(repo))
 	rootCmd.AddCommand(buildRewriteCommand(repo))
-	rootCmd.AddCommand(buildTipCommand(repo))
+	rootCmd.AddCommand(buildCreateCommand(repo))
 	rootCmd.AddCommand(buildListCommand(repo, logger))
 	rootCmd.AddCommand(buildDeleteCommand(repo, logger))
 
@@ -124,11 +124,7 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	return rewriteCommand
 }
 
-func buildTipCommand(repo *git.Repository) *cobra.Command {
-	tipCommand := &cobra.Command{
-		Use: "tip",
-	}
-
+func buildCreateCommand(repo *git.Repository) *cobra.Command {
 	createCommand := &cobra.Command{
 		Use: "create <tipName> [<base>]",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -144,13 +140,11 @@ func buildTipCommand(repo *git.Repository) *cobra.Command {
 				base = args[1]
 			}
 
-			return commands.TipCreateCommand(repo, tipName, base)
+			return commands.CreateCommand(repo, tipName, base)
 		},
 	}
 
-	tipCommand.AddCommand(createCommand)
-
-	return tipCommand
+	return createCommand
 }
 
 func buildListCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {

@@ -8,10 +8,10 @@ import (
 	"testing"
 )
 
-func TestTipCreate(t *testing.T) {
+func TestCreate(t *testing.T) {
 	test.RunOnRepo(t, "FromHead", func(t *testing.T, repo *git.Repository) {
 		// create a tip based on HEAD
-		TipCreateCommand(repo, "test", "")
+		CreateCommand(repo, "test", "")
 
 		// head should be attached to the new tip
 		head, _ := repo.Head()
@@ -37,7 +37,7 @@ func TestTipCreate(t *testing.T) {
 		test.StatusClean(t, repo)
 
 		// create a tip based on HEAD
-		TipCreateCommand(repo, "test", "refs/remotes/origin/master")
+		CreateCommand(repo, "test", "refs/remotes/origin/master")
 
 		// status should be clean
 		test.StatusClean(t, repo)
@@ -64,7 +64,7 @@ func TestTipCreate(t *testing.T) {
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
 
 		// create a tip based on HEAD
-		err := TipCreateCommand(repo, "test", "")
+		err := CreateCommand(repo, "test", "")
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Failed to write reference '"+core.RefsTips+"test': a reference with that name already exists.", err.Error())
@@ -73,7 +73,7 @@ func TestTipCreate(t *testing.T) {
 
 	test.RunOnRepo(t, "BaseDoesntExists", func(t *testing.T, repo *git.Repository) {
 
-		err := TipCreateCommand(repo, "test", "refs/remotes/github/master")
+		err := CreateCommand(repo, "test", "refs/remotes/github/master")
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Reference '"+"refs/remotes/github/master' not found", err.Error())
@@ -87,7 +87,7 @@ func TestTipCreate(t *testing.T) {
 		repo.References.Create("refs/remotes/github/master", head.Target(), true, "")
 
 		// create a tip based on some branch on github
-		err := TipCreateCommand(repo, "test", "refs/remotes/github/master")
+		err := CreateCommand(repo, "test", "refs/remotes/github/master")
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Failed to create tip \"test\". A tip with that name already exists on github.", err.Error())
