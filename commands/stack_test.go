@@ -3,9 +3,9 @@ package commands
 import (
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestStack(t *testing.T) {
@@ -32,5 +32,17 @@ func TestStack(t *testing.T) {
 
 		// status should be clean
 		test.StatusClean(t, repo)
+	})
+
+	test.RunOnRepo(t, "NotOnTip", func(t *testing.T, repo *git.Repository) {
+		// Select a branch
+		head, _ := repo.Head()
+		repo.References.Create("refs/heads/test", head.Target(), false, "")
+		_, err := repo.References.CreateSymbolic("HEAD", "refs/heads/test", true, "")
+		assert.Nil(t, err)
+
+		err = StackCommand(repo)
+
+		assert.NotNil(t, err)
 	})
 }
