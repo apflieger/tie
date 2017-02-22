@@ -11,15 +11,13 @@ import (
 
 func TestCommitCommand(t *testing.T) {
 	test.RunOnRemote(t, "Commit", func(t *testing.T, repo, remote *git.Repository) {
+		head, _ := repo.Head()
+
 		// Create a file and add it to the index
 		test.WriteFile(repo, true, "foo", "line")
 
 		// create/select a tip
-		head, _ := repo.Head()
-		repo.References.Create(core.RefsTips+"test", head.Target(), false, "")
-		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
 		// tie commit -m "fix typo"
 		err := CommitCommand(repo, "fix typo", nil)
@@ -54,11 +52,8 @@ func TestCommitCommand(t *testing.T) {
 	test.RunOnRemote(t, "EditCommitMessage", func(t *testing.T, repo, remote *git.Repository) {
 
 		// create/select a tip
-		head, _ := repo.Head()
-		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
+
 		test.Commit(repo, &test.CommitParams{
 			Message: "A commit message.\nWith a second line.",
 		})

@@ -13,16 +13,12 @@ import (
 func TestRewriteCommand(t *testing.T) {
 	test.RunOnRemote(t, "AmendHeadTree", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
+
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
 			Message: "first commit",
-			Refname: core.RefsTips + "test",
 		})
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
-
-		// select the tip
-		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
 		// change the file
 		test.WriteFile(repo, true, "foo", "line1 amended")
@@ -75,16 +71,12 @@ func TestRewriteCommand(t *testing.T) {
 
 	test.RunOnRemote(t, "AmendHeadMessage", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
+
 		test.WriteFile(repo, true, "foo", "line1")
 		test.Commit(repo, &test.CommitParams{
 			Message: "Commit message to be amended\nWith a 2nd line.",
-			Refname: core.RefsTips + "test",
 		})
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
-
-		// select the tip
-		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
 		var presetCommitMessage string
 		// amend the last commit using tie rewrite amend -m

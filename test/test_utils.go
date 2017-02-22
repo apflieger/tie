@@ -2,6 +2,7 @@ package test
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
@@ -162,4 +163,16 @@ func StatusClean(t *testing.T, repo *git.Repository) bool {
 
 func MockOpenEditor(config *git.Config, file string) (string, error) {
 	return "mocked file", nil
+}
+
+func CreateTip(repo *git.Repository, tipName, base string, slct bool) {
+	head, _ := repo.Head()
+	repo.References.Create("refs/tips/"+tipName, head.Target(), false, "")
+	repo.References.Create("refs/tails/"+tipName, head.Target(), false, "")
+	config, _ := repo.Config()
+	config.SetString(fmt.Sprintf("tip.%v.base", tipName), base)
+
+	if slct {
+		repo.References.CreateSymbolic("HEAD", "refs/tips/"+tipName, true, "")
+	}
 }

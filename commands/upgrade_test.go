@@ -53,13 +53,13 @@ func TestUpgradeCommand(t *testing.T) {
 	test.RunOnRemote(t, "UpgradeSuccess", func(t *testing.T, repo, remote *git.Repository) {
 		// create a tip on head based on refs/remotes/origin/master
 		head, _ := repo.Head()
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
-		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
 
 		// make origin/master and the tip diverge.
+		// first commit on origin/master
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
+
+		// then select the tip and commit
 		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 		now := time.Now()
 		signature := &git.Signature{
@@ -105,11 +105,9 @@ func TestUpgradeCommand(t *testing.T) {
 
 	test.RunOnRemote(t, "ConflictAbort", func(t *testing.T, repo, remote *git.Repository) {
 		// create a tip on head based on master
+		test.CreateTip(repo, "test", "refs/heads/master", false)
+
 		head, _ := repo.Head()
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/heads/master")
-		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
 		tailBeforeUpgrade := head.Target()
 
 		// make master and the tip having a conflict.
@@ -144,12 +142,9 @@ func TestUpgradeCommand(t *testing.T) {
 	})
 
 	test.RunOnRemote(t, "ConflictContinue", func(t *testing.T, repo, remote *git.Repository) {
-		// create a tip on head based on master
 		head, _ := repo.Head()
-		config, _ := repo.Config()
-		config.SetString("tip.test.base", "refs/heads/master")
-		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
+		// create a tip on head based on master
+		test.CreateTip(repo, "test", "refs/heads/master", false)
 
 		// make master and the tip having a conflict.
 		// first commit to head that is on master
@@ -201,13 +196,8 @@ func TestUpgradeCommand(t *testing.T) {
 	test.RunOnRemote(t, "UpgradeEmptyTip", func(t *testing.T, repo, remote *git.Repository) {
 		// create a tip on head based on origin/master
 		head, _ := repo.Head()
-		config, _ := repo.Config()
-		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
-		repo.References.Create(core.RefsTails+"test", head.Target(), true, "")
 		repo.References.Create("refs/remotes/origin/master", head.Target(), true, "")
-		config.SetString("tip.test.base", "refs/remotes/origin/master")
-		// select the tip
-		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
 		// Add a commit on origin/master
 		masterOid, _ := test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})

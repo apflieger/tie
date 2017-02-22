@@ -16,6 +16,8 @@ func TestDumbForCodeCoverage(t *testing.T) {
 	WriteFile(repo, true, "foo", "bar")
 
 	MockOpenEditor(nil, "")
+
+	CreateTip(repo, "test", "refs/heads/master", true)
 }
 
 func TestCreateTestLogger(t *testing.T) {
