@@ -6,12 +6,14 @@ import (
 )
 
 func SelectCommand(repo *git.Repository, shorthand string) error {
+	// lookup the reference
 	rev, err := core.Dwim(repo, shorthand)
 
 	if err != nil {
 		return err
 	}
 
+	// checkout the index and the working tree
 	commit, _ := repo.LookupCommit(rev.Target())
 
 	tree, _ := commit.Tree()
@@ -21,6 +23,7 @@ func SelectCommand(repo *git.Repository, shorthand string) error {
 		return err
 	}
 
+	// set HEAD
 	_, err = repo.References.CreateSymbolic("HEAD", rev.Name(), true, "Selected "+rev.Name())
 
 	return err
