@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestCreate(t *testing.T) {
+func TestCreateCommand(t *testing.T) {
 	test.RunOnRepo(t, "FromHead", func(t *testing.T, repo *git.Repository) {
 		// create a tip based on HEAD
 		CreateCommand(repo, "test", "")

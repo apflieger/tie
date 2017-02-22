@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestSelect(t *testing.T) {
+func TestSelectCommand(t *testing.T) {
 	test.RunOnRepo(t, "SelectTip", func(t *testing.T, repo *git.Repository) {
 		head, _ := repo.Head()
 

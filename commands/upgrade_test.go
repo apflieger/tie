@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestUpgrade(t *testing.T) {
+func TestUpgradeCommand(t *testing.T) {
 	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
 		err := UpgradeCommand(repo)
 

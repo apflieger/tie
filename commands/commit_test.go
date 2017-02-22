@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestCommit(t *testing.T) {
+func TestCommitCommand(t *testing.T) {
 	test.RunOnRemote(t, "Commit", func(t *testing.T, repo, remote *git.Repository) {
 		// Create a file and add it to the index
 		test.WriteFile(repo, true, "foo", "line")

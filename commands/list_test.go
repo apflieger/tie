@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestList(t *testing.T) {
+func TestListCommand(t *testing.T) {
 	setupRefs := func(repo *git.Repository) {
 		head, _ := repo.Head()
 		oid := head.Target()

@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func TestRewrite(t *testing.T) {
+func TestRewriteCommand(t *testing.T) {
 	test.RunOnRemote(t, "AmendHeadTree", func(t *testing.T, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "line1")

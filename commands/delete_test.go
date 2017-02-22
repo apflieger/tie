@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestDelete(t *testing.T) {
+func TestDeleteCommand(t *testing.T) {
 	test.RunOnRepo(t, "LocalTip", func(t *testing.T, repo *git.Repository) {
 		// create a tip with his tail and base
 		head, _ := repo.Head()
