@@ -20,6 +20,11 @@ func StackCommand(repo *git.Repository) error {
 
 	base, _ := repo.References.Lookup(baseRefName)
 
+	tail, _ := repo.References.Lookup(core.RefsTails+tipName)
+	if !tail.Target().Equal(base.Target()) {
+		return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please upgrade\n", tipName, baseRefName)
+	}
+
 	base.SetTarget(head.Target(), "stack tip "+tipName)
 
 	repo.References.CreateSymbolic("HEAD", baseRefName, true, "stack tip "+tipName)
