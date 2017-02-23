@@ -30,10 +30,15 @@ Same as RunOnRepo. In addition, repo has a configured origin remote.
 func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
-		defer CleanRepo(repo)
 		origin := CreateTestRepo(true)
+		defer CleanRepo(repo)
 		defer CleanRepo(origin)
-		repo.Remotes.Create("origin", origin.Path())
+		//fmt.Println("repo: " + repo.Workdir())
+		//fmt.Println("remote: " + origin.Path())
+
+		remote, _ := repo.Remotes.Create("origin", origin.Path())
+		remote.Push([]string{"+refs/heads/master"}, nil)
+
 		test(t, repo, origin)
 	})
 }

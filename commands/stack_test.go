@@ -1,11 +1,11 @@
 package commands
 
 import (
+	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
-	"github.com/apflieger/tie/core"
 )
 
 func TestStack(t *testing.T) {
@@ -78,6 +78,40 @@ func TestStack(t *testing.T) {
 
 		// Stack should have failed because the base and the tail are not on the same commit.
 		// This would lead to push a commit that doesn't belong to the tip.
+		assert.NotNil(t, err)
+	})
+
+	test.RunOnRemote(t, "OnRemoteBranch", func(t *testing.T, repo, origin *git.Repository) {
+		// Create a tip on origin/master
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
+
+		// Write a commit
+		oid, _ := test.Commit(repo, nil)
+
+		// Stack it
+		err := StackCommand(repo)
+		assert.Nil(t, err)
+
+		master, _ := origin.References.Lookup("refs/heads/master")
+		assert.True(t, master.Target().Equal(oid))
+
+		remoteMaster, _ := repo.References.Lookup("refs/remotes/origin/master")
+		assert.True(t, remoteMaster.Target().Equal(oid))
+	})
+
+	test.RunOnRepo(t, "OnRemoteTip", func(t *testing.T, repo *git.Repository) {
+		// Create a tip on a remote tip
+		head, _ := repo.Head()
+		repo.References.Create(core.RefsRemoteTips+"origin/test2", head.Target(), false, "")
+		test.CreateTip(repo, "test", core.RefsRemoteTips+"origin/test2", true)
+
+		// Write a commit
+		test.Commit(repo, nil)
+
+		// Stack it
+		err := StackCommand(repo)
+
+		// Stack doesn't allow to stack on tips for now
 		assert.NotNil(t, err)
 	})
 }

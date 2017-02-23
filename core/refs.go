@@ -34,7 +34,7 @@ func Dwim(repo *git.Repository, shorthand string) (*git.Reference, error) {
 			}
 		}
 	}
-	return nil, fmt.Errorf("No ref found for shorthand \"%v\"", shorthand)
+	return nil, fmt.Errorf("No ref found for shorthand '%v'", shorthand)
 }
 
 func TipName(refName string) (string, error) {
@@ -58,5 +58,12 @@ func RemoteName(ref string) (string, error) {
 		return matches[1], nil
 	}
 
-	return "", fmt.Errorf("\"%v\" is not a remote ref.", ref)
+	return "", fmt.Errorf("'%v' is not a remote ref.", ref)
+}
+
+func MatchingBranchfName(remoteRefName string) (string, error) {
+	if remoteRefName == "refs/remotes/origin/master" {
+		return "refs/heads/master", nil
+	}
+	return "", fmt.Errorf("'%v' is not a remote branch.", remoteRefName)
 }

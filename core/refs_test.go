@@ -18,7 +18,7 @@ func TestDwim(t *testing.T) {
 		ref, err := Dwim(repo, "foo")
 		assert.Nil(t, ref)
 		if assert.NotNil(t, err) {
-			assert.Equal(t, err.Error(), "No ref found for shorthand \"foo\"")
+			assert.Equal(t, err.Error(), "No ref found for shorthand 'foo'")
 		}
 
 		ref, err = Dwim(repo, "test")
@@ -33,7 +33,7 @@ func TestDwim(t *testing.T) {
 		assert.Nil(t, ref)
 		assert.NotNil(t, err)
 		if assert.NotNil(t, err) {
-			assert.Equal(t, err.Error(), "No ref found for shorthand \"testorigin\"")
+			assert.Equal(t, err.Error(), "No ref found for shorthand 'testorigin'")
 		}
 
 		ref, err = Dwim(repo, "origin/testorigin")

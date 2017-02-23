@@ -30,7 +30,7 @@ func TestSelectCommand(t *testing.T) {
 		err := SelectCommand(repo, "test")
 
 		if assert.NotNil(t, err) {
-			assert.Equal(t, "No ref found for shorthand \"test\"", err.Error())
+			assert.Equal(t, "No ref found for shorthand 'test'", err.Error())
 		}
 	})
 
