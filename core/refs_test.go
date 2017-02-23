@@ -68,22 +68,52 @@ func TestTipName(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestRemoteName(t *testing.T) {
-	_, err := RemoteName("refs/heads/master")
+func TestExplodeRemoteRef(t *testing.T) {
+	_, _, err := ExplodeRemoteRef("")
 	assert.NotNil(t, err)
 
-	_, err = RemoteName(RefsTips + "otherTip")
+	_, _, err = ExplodeRemoteRef("refs/heads/master")
 	assert.NotNil(t, err)
 
-	remote, err := RemoteName("refs/remotes/origin/master")
-	assert.Nil(t, err)
-	assert.Equal(t, "origin", remote)
+	_, _, err = ExplodeRemoteRef(RefsTips + "otherTip")
+	assert.NotNil(t, err)
 
-	remote, err = RemoteName("refs/remotes/origin/features/work")
-	assert.Nil(t, err)
-	assert.Equal(t, "origin", remote)
+	_, _, err = ExplodeRemoteRef("origin/master")
+	assert.NotNil(t, err)
 
-	remote, err = RemoteName(RefsRemoteTips + "origin/work")
+	remote, localRef, err := ExplodeRemoteRef("refs/remotes/origin/master")
 	assert.Nil(t, err)
 	assert.Equal(t, "origin", remote)
+	assert.Equal(t, "refs/heads/master", localRef)
+
+	remote, localRef, err = ExplodeRemoteRef("refs/remotes/origin/features/work")
+	assert.Nil(t, err)
+	assert.Equal(t, "origin", remote)
+	assert.Equal(t, "refs/heads/features/work", localRef)
+
+	remote, localRef, err = ExplodeRemoteRef("refs/remotes/somemplace/features/work")
+	assert.Nil(t, err)
+	assert.Equal(t, "somemplace", remote)
+	assert.Equal(t, "refs/heads/features/work", localRef)
+
+	remote, localRef, err = ExplodeRemoteRef(RefsRemoteTips + "origin/work")
+	assert.Nil(t, err)
+	assert.Equal(t, "origin", remote)
+	assert.Equal(t, RefsTips+"work", localRef)
+
+	remote, localRef, err = ExplodeRemoteRef(RefsRemoteTips + "somewhere/work/mine")
+	assert.Nil(t, err)
+	assert.Equal(t, "somewhere", remote)
+	assert.Equal(t, RefsTips+"work/mine", localRef)
+}
+
+func TestMatchingBranchfName(t *testing.T) {
+	assert.False(t, IsBranch(""))
+	assert.True(t, IsBranch("refs/heads/master"))
+	assert.True(t, IsBranch("refs/heads/features/work"))
+	assert.False(t, IsBranch("refs/remotes/origin/master"))
+	assert.False(t, IsBranch("origin/master"))
+	assert.False(t, IsBranch(RefsTips+"test"))
+	assert.False(t, IsBranch(RefsRemoteTips+"test"))
+	assert.False(t, IsBranch(RefsTails+"test"))
 }

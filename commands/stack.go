@@ -21,7 +21,7 @@ func StackCommand(repo *git.Repository) error {
 
 	base, _ := repo.References.Lookup(baseRefName)
 
-	remoteName, notRemote := core.RemoteName(baseRefName)
+	remoteName, pushRef, notRemote := core.ExplodeRemoteRef(baseRefName)
 
 	/*if err == nil {
 		remote, _ := repo.Remotes.Lookup(remoteName)
@@ -36,8 +36,7 @@ func StackCommand(repo *git.Repository) error {
 	if notRemote != nil {
 		base.SetTarget(head.Target(), "stack tip "+tipName)
 	} else {
-		pushRef, noMatch := core.MatchingBranchfName(baseRefName)
-		if noMatch != nil {
+		if !core.IsBranch(pushRef) {
 			return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches.", baseRefName)
 		}
 		remote, _ := repo.Remotes.Lookup(remoteName)

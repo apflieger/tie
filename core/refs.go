@@ -44,26 +44,41 @@ func TipName(refName string) (string, error) {
 	return strings.Replace(refName, RefsTips, "", 1), nil
 }
 
-// Extracts the remote name of the ref that matches patterns refs/remotes/ or refs/rtips/
-func RemoteName(ref string) (string, error) {
-	remotesRegexp := regexp.MustCompile(`refs/remotes/([^/]*)/.*`)
-	matches := remotesRegexp.FindStringSubmatch(ref)
-	if len(matches) == 2 {
-		return matches[1], nil
+// Extracts the remote name of the ref and the local refname that matches
+func ExplodeRemoteRef(ref string) (remote, localRefName string, err error) {
+	remote, localRefName, err = explodeRemoteBranch(ref)
+
+	if err == nil {
+		return
 	}
 
-	rtipsRegexp := regexp.MustCompile(RefsRemoteTips + `([^/]*)/.*`)
-	matches = rtipsRegexp.FindStringSubmatch(ref)
-	if len(matches) == 2 {
-		return matches[1], nil
+	remote, localRefName, err = explodeRemoteTip(ref)
+
+	if err == nil {
+		return
 	}
 
-	return "", fmt.Errorf("'%v' is not a remote ref.", ref)
+	return "", "", fmt.Errorf("'%v' is not a remote ref.", ref)
 }
 
-func MatchingBranchfName(remoteRefName string) (string, error) {
-	if remoteRefName == "refs/remotes/origin/master" {
-		return "refs/heads/master", nil
+func IsBranch(ref string) bool {
+	return strings.HasPrefix(ref, "refs/heads/")
+}
+
+func explodeRemoteBranch(remoteBranchRefName string) (string, string, error) {
+	remotesRegexp := regexp.MustCompile(`refs/remotes/([^/]*)/(.*)`)
+	matches := remotesRegexp.FindStringSubmatch(remoteBranchRefName)
+	if len(matches) == 3 {
+		return matches[1], "refs/heads/" + matches[2], nil
 	}
-	return "", fmt.Errorf("'%v' is not a remote branch.", remoteRefName)
+	return "", "", fmt.Errorf("'%v' is not a remote branch.", remoteBranchRefName)
+}
+
+func explodeRemoteTip(remoteBranchRefName string) (string, string, error) {
+	remotesRegexp := regexp.MustCompile(RefsRemoteTips + `([^/]*)/(.*)`)
+	matches := remotesRegexp.FindStringSubmatch(remoteBranchRefName)
+	if len(matches) == 3 {
+		return matches[1], RefsTips + matches[2], nil
+	}
+	return "", "", fmt.Errorf("'%v' is not a remote branch.", remoteBranchRefName)
 }

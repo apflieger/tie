@@ -26,7 +26,7 @@ func DeleteCommand(repo *git.Repository, logger *log.Logger, refs []string) erro
 		base, _ := config.LookupString(baseKey)
 		config.Delete(baseKey)
 
-		remoteName, err := core.RemoteName(base)
+		remoteName, _, err := core.ExplodeRemoteRef(base)
 
 		if err == nil {
 			remote, _ := repo.Remotes.Lookup(remoteName)

@@ -21,7 +21,7 @@ func PushTip(repo *git.Repository, tipName string) error {
 	// lookup the remote corresponding to the base of the tip
 	config, _ := repo.Config()
 	base, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
-	remoteName, err := RemoteName(base)
+	remoteName, _, err := ExplodeRemoteRef(base)
 
 	if err != nil {
 		return err
