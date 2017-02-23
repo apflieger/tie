@@ -23,6 +23,10 @@ func StackCommand(repo *git.Repository) error {
 
 	remoteName, pushRef, notRemote := core.ExplodeRemoteRef(baseRefName)
 
+	if notRemote == nil && !core.IsBranch(pushRef) {
+		return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches.", baseRefName)
+	}
+
 	/*if err == nil {
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		remote.Fetch([]string{}, nil, "stack tip "+tipName)
@@ -36,9 +40,6 @@ func StackCommand(repo *git.Repository) error {
 	if notRemote != nil {
 		base.SetTarget(head.Target(), "stack tip "+tipName)
 	} else {
-		if !core.IsBranch(pushRef) {
-			return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches.", baseRefName)
-		}
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		pushOptions := &git.PushOptions{
 			RemoteCallbacks: git.RemoteCallbacks{
