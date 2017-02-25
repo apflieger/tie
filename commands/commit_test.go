@@ -75,4 +75,12 @@ func TestCommitCommand(t *testing.T) {
 		newCommit, _ := repo.LookupCommit(head2.Target())
 		assert.Equal(t, "Commit message from mocked editor\n", newCommit.Message()) // commit message has been formatted
 	})
+
+	test.RunOnRepo(t, "NotOnTipError", func(t *testing.T, repo *git.Repository) {
+		err := CommitCommand(repo, "Commit on master", nil)
+
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.", err.Error())
+		}
+	})
 }

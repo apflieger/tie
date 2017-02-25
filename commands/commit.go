@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bytes"
+	"errors"
 	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
@@ -11,7 +12,11 @@ import (
 
 func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
-	tipName, _ := core.TipName(head.Name())
+	tipName, notTip := core.TipName(head.Name())
+
+	if notTip != nil {
+		return errors.New("HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.")
+	}
 
 	if commitMessage == "" {
 		linesRegexp := regexp.MustCompile(`(.*)`)
