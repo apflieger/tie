@@ -107,6 +107,17 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 	rewriteCommand := &cobra.Command{
 		Short: "Allow to edit, reword or reorder current tip's commits",
 		Use:   "rewrite",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return env.RewriteStartCommand(repo)
+			} else if args[0] == "continue" {
+				return env.RewriteContinueCommand(repo)
+			} else if args[0] == "abort" {
+				return env.RewriteAbortCommand(repo)
+			} else {
+				return fmt.Errorf("Incurrect verb '%v'.\n", args[0])
+			}
+		},
 	}
 
 	var message string
