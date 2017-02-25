@@ -25,7 +25,9 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repo
 }
 
 /*
-Same as RunOnRepo. In addition, repo has a configured origin remote.
+The given repo is attached on refs/heads/master, which has one single commit.
+repo has a configured origin remote which repository is passed as argument.
+refs/heads/master is pushed to origin. refs/remotes/origin/master on repo is set.
 */
 func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
