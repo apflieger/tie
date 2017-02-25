@@ -37,6 +37,15 @@ func Dwim(repo *git.Repository, shorthand string) (*git.Reference, error) {
 	return nil, fmt.Errorf("No ref found for shorthand '%v'", shorthand)
 }
 
+func Shorthand(ref string) string {
+	remotesRegexp := regexp.MustCompile(`refs/(heads|remotes|tips|rtips)/(.*)`)
+	matches := remotesRegexp.FindStringSubmatch(ref)
+	if len(matches) == 3 {
+		return matches[2]
+	}
+	return ref
+}
+
 func TipName(refName string) (string, error) {
 	if !strings.HasPrefix(refName, RefsTips) {
 		return "", errors.New("")

@@ -38,7 +38,7 @@ func main() {
 	rootCmd.AddCommand(buildCreateCommand(repo))
 	rootCmd.AddCommand(buildListCommand(repo, logger))
 	rootCmd.AddCommand(buildDeleteCommand(repo, logger))
-	rootCmd.AddCommand(buildStackCommand(repo))
+	rootCmd.AddCommand(buildStackCommand(repo, logger))
 
 	rootCmd.Execute()
 }
@@ -200,12 +200,12 @@ func buildDeleteCommand(repo *git.Repository, logger *log.Logger) *cobra.Command
 	return deleteCommand
 }
 
-func buildStackCommand(repo *git.Repository) *cobra.Command {
+func buildStackCommand(repo *git.Repository, logger *log.Logger) *cobra.Command {
 	stackCommand := &cobra.Command{
 		Use:   "stack",
 		Short: "Put tip's commits into a branch",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.StackCommand(repo)
+			return commands.StackCommand(repo, logger)
 		},
 	}
 

@@ -6,9 +6,10 @@ import (
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
+	"log"
 )
 
-func StackCommand(repo *git.Repository) error {
+func StackCommand(repo *git.Repository, logger *log.Logger) error {
 	head, _ := repo.Head()
 	tipName, notTip := core.TipName(head.Name())
 
@@ -34,13 +35,18 @@ func StackCommand(repo *git.Repository) error {
 	if notRemote != nil {
 		// Base and tail should have the same target for the stack to be allowed.
 		// This guaranty the base to be fastforwarded
-		base.SetTarget(head.Target(), "stack tip "+tipName)
+		base.SetTarget(head.Target(), "stack tip "+tipName) // base is not mutated, .Target will still return the previous one
+		printStackInfo(repo, logger, baseRefName, head.Name(), base.Target(), head.Target())
 	} else {
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		pushOptions := &git.PushOptions{
 			RemoteCallbacks: git.RemoteCallbacks{
 				CredentialsCallback:      env.CredentialCallback,
 				CertificateCheckCallback: env.CertificateCheckCallback,
+				UpdateTipsCallback: func(refname string, a *git.Oid, b *git.Oid) git.ErrorCode {
+					printStackInfo(repo, logger, baseRefName, head.Name(), a, b)
+					return git.ErrOk
+				},
 			},
 		}
 		// There's a vulnerability in case of a reverse fast forward reset on the remote.
@@ -54,4 +60,17 @@ func StackCommand(repo *git.Repository) error {
 
 	repo.References.CreateSymbolic("HEAD", baseRefName, true, "stack tip "+tipName)
 	return nil
+}
+
+func printStackInfo(repo *git.Repository, logger *log.Logger, baseRefName, tipRefName string, baseOid, tipOid *git.Oid) {
+	ahead, _, _ := repo.AheadBehind(tipOid, baseOid)
+	plural := ""
+	if ahead > 1 {
+		plural = "s"
+	}
+	logger.Printf("%v <- %v (%v commit%v)\n",
+		core.Shorthand(baseRefName),
+		core.Shorthand(tipRefName),
+		ahead,
+		plural)
 }

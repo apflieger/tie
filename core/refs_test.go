@@ -54,6 +54,21 @@ func TestDwim(t *testing.T) {
 	})
 }
 
+func TestShorthand(t *testing.T) {
+	assert.Equal(t, "", Shorthand(""))
+	// Local branches
+	assert.Equal(t, "master", Shorthand("refs/heads/master"))
+	assert.Equal(t, "work/local", Shorthand("refs/heads/work/local"))
+	// Remote branches
+	assert.Equal(t, "origin/master", Shorthand("refs/remotes/origin/master"))
+	assert.Equal(t, "somewhere/master", Shorthand("refs/remotes/somewhere/master"))
+	assert.Equal(t, "origin/work/other", Shorthand("refs/remotes/origin/work/other"))
+	// LKocal tips
+	assert.Equal(t, "a_tip", Shorthand(RefsTips+"a_tip"))
+	// Remote tips
+	assert.Equal(t, "origin/a_tip", Shorthand(RefsRemoteTips+"origin/a_tip"))
+}
+
 func TestTipName(t *testing.T) {
 	name, err := TipName("refs/remotes/origin/master")
 	assert.Equal(t, "", name)

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"bytes"
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
@@ -9,13 +10,14 @@ import (
 )
 
 func TestStack(t *testing.T) {
-	test.RunOnRepo(t, "SimpleStack", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "LocalBranchStack", func(t *testing.T, repo *git.Repository) {
 		// Create a tip 1 commit ahead of master
 		test.CreateTip(repo, "test", "refs/heads/master", true)
 		test.WriteFile(repo, true, "foo", "line")
 		oid, _ := test.Commit(repo, nil)
 
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		assert.Nil(t, err)
 
@@ -26,6 +28,9 @@ func TestStack(t *testing.T) {
 
 		// Status should be clean
 		test.StatusClean(t, repo)
+
+		// Output should be...
+		assert.Equal(t, "master <- test (1 commit)\n", out.String())
 	})
 
 	test.RunOnRepo(t, "NotOnTipError", func(t *testing.T, repo *git.Repository) {
@@ -35,7 +40,8 @@ func TestStack(t *testing.T) {
 		_, err := repo.References.CreateSymbolic("HEAD", "refs/heads/test", true, "")
 		assert.Nil(t, err)
 
-		err = StackCommand(repo)
+		var out *bytes.Buffer
+		err = StackCommand(repo, test.CreateTestLogger(&out))
 
 		assert.NotNil(t, err)
 	})
@@ -52,7 +58,8 @@ func TestStack(t *testing.T) {
 		test.Commit(repo, nil)
 
 		// Try to stack the tip
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		// Stack should have failed because the tip doesn't fast forward his base
 		assert.NotNil(t, err)
@@ -74,22 +81,26 @@ func TestStack(t *testing.T) {
 		master.SetTarget(firstCommit, "")
 
 		// Try to stack the tip
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		// Stack should have failed because the base and the tail are not on the same commit.
 		// This would lead to push a commit that doesn't belong to the tip.
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRemote(t, "OnRemoteBranch", func(t *testing.T, repo, origin *git.Repository) {
+	test.RunOnRemote(t, "RemoteBranchStack", func(t *testing.T, repo, origin *git.Repository) {
 		// Create a tip on origin/master
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
 		// Write a commit
+		test.Commit(repo, nil)
+		// And a 2nd
 		oid, _ := test.Commit(repo, nil)
 
 		// Stack it
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 		assert.Nil(t, err)
 
 		master, _ := origin.References.Lookup("refs/heads/master")
@@ -97,6 +108,9 @@ func TestStack(t *testing.T) {
 
 		remoteMaster, _ := repo.References.Lookup("refs/remotes/origin/master")
 		assert.True(t, remoteMaster.Target().Equal(oid))
+
+		// Output should be...
+		assert.Equal(t, "origin/master <- test (2 commits)\n", out.String())
 	})
 
 	test.RunOnRemote(t, "RemoteFastForwardError", func(t *testing.T, repo, origin *git.Repository) {
@@ -127,13 +141,14 @@ func TestStack(t *testing.T) {
 		test.Commit(repo, nil)
 
 		// Try to stack the tip
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		// Stack should have failed because the tip doesn't fast forward his base
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRepo(t, "OnRemoteTip", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteTipError", func(t *testing.T, repo *git.Repository) {
 		// Create a tip on a remote tip
 		head, _ := repo.Head()
 		repo.References.Create(core.RefsRemoteTips+"origin/test2", head.Target(), false, "")
@@ -143,7 +158,8 @@ func TestStack(t *testing.T) {
 		test.Commit(repo, nil)
 
 		// Stack it
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		// Stack doesn't allow to stack on tips for now
 		assert.NotNil(t, err)
@@ -167,7 +183,8 @@ func TestStack(t *testing.T) {
 		// At this point, test2 is ff to origin/master
 
 		// Try to stack the tip.
-		err := StackCommand(repo)
+		var out *bytes.Buffer
+		err := StackCommand(repo, test.CreateTestLogger(&out))
 
 		// Stacking this tip would mean to have the commit of test1 to be stacked as well
 		assert.NotNil(t, err)
