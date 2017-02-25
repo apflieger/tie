@@ -43,17 +43,19 @@ func main() {
 }
 
 func buildCommitCommand(repo *git.Repository) *cobra.Command {
-	var message string
+	var message, tipName string
 
 	commitCommand := &cobra.Command{
 		Use:   "commit",
 		Short: "Record changes in the currently selected tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.CommitCommand(repo, message, env.OpenEditor)
+			return commands.CommitCommand(repo, message, env.OpenEditor, tipName)
 		},
 	}
 
 	commitCommand.Flags().StringVarP(&message, "message", "m", "", "commit message")
+	commitCommand.Flags().StringVarP(&tipName, "tip", "t", core.OptionMissing, "create a tip on the fly")
+	commitCommand.Flag("tip").NoOptDefVal = core.OptionWithoutValue
 
 	commitCommand.Aliases = []string{"ci"}
 

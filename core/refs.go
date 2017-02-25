@@ -44,6 +44,17 @@ func TipName(refName string) (string, error) {
 	return strings.Replace(refName, RefsTips, "", 1), nil
 }
 
+// Return the substring of refName after the last '/'
+func RefName(refName string) (string, error) {
+	parts := strings.Split(refName, "/")
+
+	if len(parts) > 1 {
+		return parts[len(parts)-1], nil
+	}
+
+	return "", fmt.Errorf("'%v' is not a physical ref.", refName)
+}
+
 // Extracts the remote name of the ref and the local refname that matches
 func ExplodeRemoteRef(ref string) (remote, localRefName string, err error) {
 	remote, localRefName, err = explodeRemoteBranch(ref)

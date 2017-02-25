@@ -3,19 +3,43 @@ package commands
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
-func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor) error {
+func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor, tipName string) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
-	tipName, notTip := core.TipName(head.Name())
 
-	if notTip != nil {
-		return errors.New("HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.")
+	if tipName == core.OptionMissing {
+		var notTip error
+		tipName, notTip = core.TipName(head.Name())
+
+		if notTip != nil {
+			return errors.New("HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.")
+		}
+	} else {
+		tipName = strings.Trim(tipName, " ")
+
+		if tipName == "" {
+			return errors.New("Name of the tip can't be empty.")
+		}
+
+		if tipName == core.OptionWithoutValue {
+			tipName, _ = core.RefName(head.Name())
+			tipName = tipName + "-tip"
+		}
+
+		// Create and select a new tip
+		tip, _ := repo.References.Create(core.RefsTips+tipName, head.Target(), false, "tie commit -t")
+		repo.References.Create(core.RefsTails+tipName, head.Target(), false, "tie commit -t")
+		config, _ := repo.Config()
+		config.SetString(fmt.Sprintf("tip.%v.base", tipName), head.Name())
+		head, _ = repo.References.CreateSymbolic("HEAD", tip.Name(), true, "tie commit -t")
 	}
 
 	if commitMessage == "" {

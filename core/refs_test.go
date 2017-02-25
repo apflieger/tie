@@ -68,6 +68,38 @@ func TestTipName(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestRefName(t *testing.T) {
+	var err error
+	var refName string
+
+	_, err = RefName("")
+	assert.NotNil(t, err)
+
+	_, err = RefName("HEAD")
+	assert.NotNil(t, err)
+
+	refName, err = RefName("refs/heads/master")
+	assert.Equal(t, "master", refName)
+
+	refName, err = RefName("refs/heads/work/mine")
+	assert.Equal(t, "mine", refName)
+
+	refName, err = RefName("refs/remotes/origin/master")
+	assert.Equal(t, "master", refName)
+
+	refName, err = RefName("refs/remotes/origin/work/yours")
+	assert.Equal(t, "yours", refName)
+
+	refName, err = RefName(RefsTips + "my_tip")
+	assert.Equal(t, "my_tip", refName)
+
+	refName, err = RefName(RefsTips + "tmp/my_tip")
+	assert.Equal(t, "my_tip", refName)
+
+	refName, err = RefName(RefsRemoteTips + "origin/my_tip")
+	assert.Equal(t, "my_tip", refName)
+}
+
 func TestExplodeRemoteRef(t *testing.T) {
 	_, _, err := ExplodeRemoteRef("")
 	assert.NotNil(t, err)

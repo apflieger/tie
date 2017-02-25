@@ -20,7 +20,7 @@ func TestCommitCommand(t *testing.T) {
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
 		// tie commit -m "fix typo"
-		err := CommitCommand(repo, "fix typo", nil)
+		err := CommitCommand(repo, "fix typo", nil, core.OptionMissing)
 		assert.Nil(t, err)
 
 		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
@@ -65,7 +65,7 @@ func TestCommitCommand(t *testing.T) {
 			bytes, _ := ioutil.ReadFile(file)
 			presetCommitMessage = string(bytes)
 			return "Commit message from mocked editor", nil
-		})
+		}, core.OptionMissing)
 
 		// The commit message should have been preset with the previous one, commented
 		assert.Equal(t, "#A commit message.\n#With a second line.\n", presetCommitMessage)
@@ -77,10 +77,61 @@ func TestCommitCommand(t *testing.T) {
 	})
 
 	test.RunOnRepo(t, "NotOnTipError", func(t *testing.T, repo *git.Repository) {
-		err := CommitCommand(repo, "Commit on master", nil)
+		err := CommitCommand(repo, "Commit on master", nil, core.OptionMissing)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.", err.Error())
 		}
+	})
+
+	test.RunOnRepo(t, "OnTheFlyTipEmptyNameError", func(t *testing.T, repo *git.Repository) {
+		err := CommitCommand(repo, "Commit on master", nil, "")
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Name of the tip can't be empty.", err.Error())
+		}
+
+		err = CommitCommand(repo, "Commit on master", nil, " ")
+		if assert.NotNil(t, err) {
+			assert.Equal(t, "Name of the tip can't be empty.", err.Error())
+		}
+	})
+
+	test.RunOnRepo(t, "OnTheFlyNamedTip", func(t *testing.T, repo *git.Repository) {
+		// Write a file
+		test.WriteFile(repo, true, "foo", "bar")
+
+		// tie commit -t new_tip -m "Added foo"
+		err := CommitCommand(repo, "Added foo", nil, "new_tip")
+		assert.Nil(t, err)
+
+		// HEAD should be on new_tip
+		head, _ := repo.Head()
+		assert.Equal(t, core.RefsTips+"new_tip", head.Name())
+
+		// Status should be clean
+		test.StatusClean(t, repo)
+
+		// new_tip should be based on master (previous HEAD)
+		config, _ := repo.Config()
+		base, _ := config.LookupString("tip.new_tip.base")
+		assert.Equal(t, "refs/heads/master", base)
+
+		// new_tip's tail should be on master
+		tail, _ := repo.References.Lookup(core.RefsTails + "new_tip")
+		master, _ := repo.References.Lookup("refs/heads/master")
+		assert.True(t, tail.Target().Equal(master.Target()))
+	})
+
+	test.RunOnRepo(t, "OnTheFlyUnnamedTip", func(t *testing.T, repo *git.Repository) {
+		// Write a file
+		test.WriteFile(repo, true, "foo", "bar")
+
+		// tie commit -t new_tip -m "Added foo"
+		err := CommitCommand(repo, "Added foo", nil, core.OptionWithoutValue)
+		assert.Nil(t, err)
+
+		// HEAD should be on master-tip
+		head, _ := repo.Head()
+		assert.Equal(t, core.RefsTips+"master-tip", head.Name())
 	})
 }
