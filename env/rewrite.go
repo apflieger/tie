@@ -3,6 +3,7 @@ package env
 import (
 	"bytes"
 	"errors"
+	"github.com/apflieger/tie/core"
 	"gopkg.in/libgit2/git2go.v25"
 	"os"
 	"os/exec"
@@ -25,7 +26,13 @@ func RewriteStartCommand(repo *git.Repository) error {
 		"--onto", tail.Target().String(),
 		tail.Target().String())
 
-	return runGit(cmd)
+	err := runGit(cmd)
+
+	if repo.State() == git.RepositoryStateNone {
+		core.PushTip(repo, tipName, RemoteCallbacks)
+	}
+
+	return err
 }
 
 func RewriteContinueCommand(repo *git.Repository) error {
@@ -36,7 +43,15 @@ func RewriteContinueCommand(repo *git.Repository) error {
 	cmd := exec.Command("git", "-C", repo.Workdir(),
 		"rebase", "--continue")
 
-	return runGit(cmd)
+	err := runGit(cmd)
+
+	if repo.State() == git.RepositoryStateNone {
+		head, _ := repo.Head()
+		tipName := strings.Replace(head.Name(), "refs/tips/", "", 1)
+		core.PushTip(repo, tipName, RemoteCallbacks)
+	}
+
+	return err
 }
 
 func RewriteAbortCommand(repo *git.Repository) error {
