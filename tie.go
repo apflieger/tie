@@ -55,7 +55,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 	}
 
 	commitCommand.Flags().StringVarP(&message, "message", "m", "", "commit message")
-	commitCommand.Flags().StringVarP(&tipName, "tip", "t", core.OptionMissing, "create a tip on the fly")
+	commitCommand.Flags().StringVarP(&tipName, "tip", "t", core.OptionMissing, "create and select a tip on the fly")
 	commitCommand.Flag("tip").NoOptDefVal = core.OptionWithoutValue
 
 	commitCommand.Aliases = []string{"ci"}
