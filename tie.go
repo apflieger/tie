@@ -50,7 +50,7 @@ func buildCommitCommand(repo *git.Repository) *cobra.Command {
 		Use:   "commit",
 		Short: "Record changes in the currently selected tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.CommitCommand(repo, message, env.OpenEditor, tipName)
+			return commands.CommitCommand(repo, message, env.OpenEditor, tipName, env.RemoteCallbacks)
 		},
 	}
 
@@ -82,7 +82,7 @@ func buildUpgradeCommand(repo *git.Repository) *cobra.Command {
 		Use:   "upgrade",
 		Short: "Get the current tip up-to-date with it's base",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.UpgradeCommand(repo)
+			return commands.UpgradeCommand(repo, env.RemoteCallbacks)
 		},
 	}
 
@@ -129,7 +129,7 @@ func buildRewriteCommand(repo *git.Repository) *cobra.Command {
 		Use:   "amend",
 		Short: "Meld changes into the previous commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.AmendCommand(repo, message, env.OpenEditor)
+			return commands.AmendCommand(repo, message, env.OpenEditor, env.RemoteCallbacks)
 		},
 	}
 
@@ -193,7 +193,7 @@ func buildDeleteCommand(repo *git.Repository, logger *log.Logger) *cobra.Command
 		Use:   "delete",
 		Short: "Delete tips",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.DeleteCommand(repo, logger, args)
+			return commands.DeleteCommand(repo, logger, args, env.RemoteCallbacks)
 		},
 	}
 
@@ -205,7 +205,7 @@ func buildStackCommand(repo *git.Repository, logger *log.Logger) *cobra.Command 
 		Use:   "stack",
 		Short: "Put tip's commits into a branch",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.StackCommand(repo, logger)
+			return commands.StackCommand(repo, logger, env.RemoteCallbacks)
 		},
 	}
 

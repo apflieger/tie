@@ -17,7 +17,7 @@ func TestStack(t *testing.T) {
 		oid, _ := test.Commit(repo, nil)
 
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		assert.Nil(t, err)
 
@@ -45,7 +45,7 @@ func TestStack(t *testing.T) {
 		assert.Nil(t, err)
 
 		var out *bytes.Buffer
-		err = StackCommand(repo, test.CreateTestLogger(&out))
+		err = StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		assert.NotNil(t, err)
 	})
@@ -63,7 +63,7 @@ func TestStack(t *testing.T) {
 
 		// Try to stack the tip
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		// Stack should have failed because the tip doesn't fast forward his base
 		assert.NotNil(t, err)
@@ -86,7 +86,7 @@ func TestStack(t *testing.T) {
 
 		// Try to stack the tip
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		// Stack should have failed because the base and the tail are not on the same commit.
 		// This would lead to push a commit that doesn't belong to the tip.
@@ -102,11 +102,11 @@ func TestStack(t *testing.T) {
 		// And a 2nd
 		oid, _ := test.Commit(repo, nil)
 
-		core.PushTip(repo, "test")
+		core.PushTip(repo, "test", nil)
 
 		// Stack it
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 		assert.Nil(t, err)
 
 		master, _ := origin.References.Lookup("refs/heads/master")
@@ -148,7 +148,7 @@ func TestStack(t *testing.T) {
 
 		// Try to stack the tip
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		// Stack should have failed because the tip doesn't fast forward his base
 		assert.NotNil(t, err)
@@ -165,7 +165,7 @@ func TestStack(t *testing.T) {
 
 		// Stack it
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		// Stack doesn't allow to stack on tips for now
 		assert.NotNil(t, err)
@@ -190,7 +190,7 @@ func TestStack(t *testing.T) {
 
 		// Try to stack the tip.
 		var out *bytes.Buffer
-		err := StackCommand(repo, test.CreateTestLogger(&out))
+		err := StackCommand(repo, test.CreateTestLogger(&out), nil)
 
 		// Stacking this tip would mean to have the commit of test1 to be stacked as well
 		assert.NotNil(t, err)

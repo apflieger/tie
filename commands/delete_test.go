@@ -15,7 +15,7 @@ func TestDeleteCommand(t *testing.T) {
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"})
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, nil)
 
 		assert.Nil(t, err)
 
@@ -33,7 +33,7 @@ func TestDeleteCommand(t *testing.T) {
 		repo.References.Create("refs/heads/test", head.Target(), false, "")
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{"refs/heads/test"})
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{"refs/heads/test"}, nil)
 
 		// tie delete doesn't allow to delete branches
 		assert.NotNil(t, err)
@@ -60,7 +60,7 @@ func TestDeleteCommand(t *testing.T) {
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{tipRefName})
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{tipRefName}, nil)
 
 		assert.Nil(t, err)
 
@@ -78,7 +78,7 @@ func TestDeleteCommand(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"})
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, nil)
 
 		assert.Nil(t, err)
 

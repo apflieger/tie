@@ -5,7 +5,7 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 )
 
-func CredentialCallback(url string, username_from_url string, allowedTypes git.CredType) (git.ErrorCode, *git.Cred) {
+func credentialCallback(url string, username_from_url string, allowedTypes git.CredType) (git.ErrorCode, *git.Cred) {
 	// inspired by https://github.com/jwaldrip/git-get/blob/master/callbacks.go#L26
 
 	if allowedTypes&git.CredTypeUserpassPlaintext != 0 {
@@ -29,6 +29,11 @@ func CredentialCallback(url string, username_from_url string, allowedTypes git.C
 	return git.ErrUser, nil
 }
 
-func CertificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
+func certificateCheckCallback(cert *git.Certificate, valid bool, hostname string) git.ErrorCode {
 	return git.ErrOk
+}
+
+var RemoteCallbacks = &git.RemoteCallbacks{
+	CredentialsCallback:      credentialCallback,
+	CertificateCheckCallback: certificateCheckCallback,
 }

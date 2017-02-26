@@ -3,7 +3,6 @@ package core
 import (
 	"bytes"
 	"fmt"
-	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"strings"
@@ -18,7 +17,7 @@ func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.C
 	return head, headCommit, treeToCommit
 }
 
-func PushTip(repo *git.Repository, tipName string) error {
+func PushTip(repo *git.Repository, tipName string, pushCallbacks *git.RemoteCallbacks) error {
 	// lookup the remote corresponding to the base of the tip
 	config, _ := repo.Config()
 	base, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
@@ -34,12 +33,6 @@ func PushTip(repo *git.Repository, tipName string) error {
 	}
 
 	// push the tip on the remote
-	pushOptions := &git.PushOptions{
-		RemoteCallbacks: git.RemoteCallbacks{
-			CredentialsCallback:      env.CredentialCallback,
-			CertificateCheckCallback: env.CertificateCheckCallback,
-		},
-	}
 
 	tip, _ := repo.References.Lookup(RefsTips + tipName)
 	refspecs := []string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}
@@ -51,6 +44,12 @@ func PushTip(repo *git.Repository, tipName string) error {
 		refspecs = append(refspecs, fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName))
 	}
 
+	var pushOptions *git.PushOptions
+	if pushCallbacks != nil {
+		pushOptions = &git.PushOptions{
+			RemoteCallbacks: *pushCallbacks,
+		}
+	}
 	pushErr := remote.Push(refspecs, pushOptions)
 
 	if pushErr != nil {
@@ -79,7 +78,7 @@ func FormatCommitMessage(s string) string {
 	return buffer.String()
 }
 
-func DeleteTip(repo *git.Repository, logger *log.Logger, tipName string) {
+func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, pushCallbacks *git.RemoteCallbacks) {
 	// Delete the tip locally
 	tip, _ := repo.References.Lookup(RefsTips + tipName)
 	tip.Delete()
@@ -97,11 +96,11 @@ func DeleteTip(repo *git.Repository, logger *log.Logger, tipName string) {
 	remoteName, _, err := ExplodeRemoteRef(base)
 	if err == nil {
 		remote, _ := repo.Remotes.Lookup(remoteName)
-		pushOptions := &git.PushOptions{
-			RemoteCallbacks: git.RemoteCallbacks{
-				CredentialsCallback:      env.CredentialCallback,
-				CertificateCheckCallback: env.CertificateCheckCallback,
-			},
+		var pushOptions *git.PushOptions
+		if pushCallbacks != nil {
+			pushOptions = &git.PushOptions{
+				RemoteCallbacks: *pushCallbacks,
+			}
 		}
 		refspecs := []string{":" + tip.Name()}
 

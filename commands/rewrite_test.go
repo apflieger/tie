@@ -24,7 +24,7 @@ func TestRewriteCommand(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "line1 amended")
 
 		// amend the last commit
-		err := AmendCommand(repo, core.OptionMissing, test.MockOpenEditor)
+		err := AmendCommand(repo, core.OptionMissing, test.MockOpenEditor, nil)
 
 		assert.Nil(t, err)
 
@@ -84,7 +84,7 @@ func TestRewriteCommand(t *testing.T) {
 			bytes, _ := ioutil.ReadFile(file)
 			presetCommitMessage = string(bytes)
 			return "Commit message from mocked editor", nil
-		})
+		}, nil)
 
 		assert.Equal(t, "Commit message to be amended\nWith a 2nd line.", presetCommitMessage)
 

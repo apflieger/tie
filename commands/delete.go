@@ -6,14 +6,14 @@ import (
 	"log"
 )
 
-func DeleteCommand(repo *git.Repository, logger *log.Logger, refs []string) error {
+func DeleteCommand(repo *git.Repository, logger *log.Logger, refs []string, pushCallbacks *git.RemoteCallbacks) error {
 	for _, ref := range refs {
 		tipName, err := core.TipName(ref)
 		if err != nil {
 			return err
 		}
 
-		core.DeleteTip(repo, logger, tipName)
+		core.DeleteTip(repo, tipName, logger, pushCallbacks)
 	}
 	return nil
 }

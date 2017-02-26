@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 )
 
-func StackCommand(repo *git.Repository, logger *log.Logger) error {
+func StackCommand(repo *git.Repository, logger *log.Logger, pushCallbacks *git.RemoteCallbacks) error {
 	head, _ := repo.Head()
 	tipName, notTip := core.TipName(head.Name())
 
@@ -41,13 +40,15 @@ func StackCommand(repo *git.Repository, logger *log.Logger) error {
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		pushOptions := &git.PushOptions{
 			RemoteCallbacks: git.RemoteCallbacks{
-				CredentialsCallback:      env.CredentialCallback,
-				CertificateCheckCallback: env.CertificateCheckCallback,
 				UpdateTipsCallback: func(refname string, a *git.Oid, b *git.Oid) git.ErrorCode {
 					printStackInfo(repo, logger, baseRefName, head.Name(), a, b)
 					return git.ErrOk
 				},
 			},
+		}
+		if pushCallbacks != nil {
+			pushOptions.RemoteCallbacks.CredentialsCallback = pushCallbacks.CredentialsCallback
+			pushOptions.RemoteCallbacks.CertificateCheckCallback = pushCallbacks.CertificateCheckCallback
 		}
 		// There's a vulnerability in case of a reverse fast forward reset on the remote.
 		// In which case push will succeed, putting commits that have been removed back to the base.
@@ -61,7 +62,7 @@ func StackCommand(repo *git.Repository, logger *log.Logger) error {
 	repo.References.CreateSymbolic("HEAD", baseRefName, true, "stack tip "+tipName)
 
 	// The tip has been successfully stacked. Now we can delete it.
-	core.DeleteTip(repo, logger, tipName)
+	core.DeleteTip(repo, tipName, logger, pushCallbacks)
 
 	return nil
 }

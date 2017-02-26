@@ -31,7 +31,7 @@ func TestPushTip(t *testing.T) {
 		})
 
 		// push the tip
-		PushTip(repo, "test")
+		PushTip(repo, "test", nil)
 
 		// local repo should have a remote tip
 		rtip, err := repo.References.Lookup(RefsRemoteTips + "origin/test")
@@ -52,7 +52,7 @@ func TestPushTip(t *testing.T) {
 		config.SetString("tip.test.base", "refs/heads/master")
 
 		// push the tip
-		err := PushTip(repo, "test")
+		err := PushTip(repo, "test", nil)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -70,7 +70,7 @@ func TestPushTip(t *testing.T) {
 		config.SetString("tip.test.base", "refs/remotes/somewhere/master")
 
 		// push the tip
-		err := PushTip(repo, "test")
+		err := PushTip(repo, "test", nil)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -90,7 +90,7 @@ func TestPushTip(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		// push the tip
-		err := PushTip(repo, "test")
+		err := PushTip(repo, "test", nil)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -115,7 +115,7 @@ func TestPushTip(t *testing.T) {
 		})
 
 		// push the tip
-		err := PushTip(repo, "test")
+		err := PushTip(repo, "test", nil)
 		assert.Nil(t, err)
 
 		// local repo should have a remote branch corresponding to the tip
@@ -153,7 +153,7 @@ func TestDeleteTip(t *testing.T) {
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
 		var out *bytes.Buffer
-		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")
@@ -187,7 +187,7 @@ func TestDeleteTip(t *testing.T) {
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
 		var out *bytes.Buffer
-		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(tipRefName)
@@ -223,7 +223,7 @@ func TestDeleteTip(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		var out *bytes.Buffer
-		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")

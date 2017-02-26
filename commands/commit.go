@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor, tipName string) error {
+func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor, tipName string, pushCallbacks *git.RemoteCallbacks) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
 
 	if tipName == core.OptionMissing {
@@ -59,7 +59,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.O
 	signature, _ := repo.DefaultSignature()
 	repo.CreateCommit(head.Name(), signature, signature, core.FormatCommitMessage(commitMessage), tree, headCommit)
 
-	core.PushTip(repo, tipName)
+	core.PushTip(repo, tipName, pushCallbacks)
 
 	return nil
 }

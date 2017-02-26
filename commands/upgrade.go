@@ -20,7 +20,7 @@ const (
 /**
 Select the given refname. refname can be shorthand.
 */
-func UpgradeCommand(repo *git.Repository) error {
+func UpgradeCommand(repo *git.Repository, pushCallbacks *git.RemoteCallbacks) error {
 	head, _ := repo.Head()
 	tipName, err := core.TipName(head.Name())
 
@@ -59,7 +59,7 @@ func UpgradeCommand(repo *git.Repository) error {
 	tailRef.SetTarget(baseRef.Target(), "tie upgrade")
 
 	if rebase.OperationCount() > 0 {
-		core.PushTip(repo, tipName)
+		core.PushTip(repo, tipName, pushCallbacks)
 	}
 
 	rebase.Free()

@@ -11,7 +11,7 @@ import (
 
 func TestUpgradeCommand(t *testing.T) {
 	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, repo *git.Repository) {
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "HEAD not on a tip. Only tips can be upgraded.", err.Error())
@@ -24,7 +24,7 @@ func TestUpgradeCommand(t *testing.T) {
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
 		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 
 		// upgrade requires a base to be defined
 		if assert.NotNil(t, err) {
@@ -42,7 +42,7 @@ func TestUpgradeCommand(t *testing.T) {
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 
 		// upgrade requires the tip to have a tail
 		if assert.NotNil(t, err) {
@@ -77,7 +77,7 @@ func TestUpgradeCommand(t *testing.T) {
 		})
 
 		// do the upgrade
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 		assert.Nil(t, err)
 
 		// we expect the tip to be on top of origin/master
@@ -123,7 +123,7 @@ func TestUpgradeCommand(t *testing.T) {
 		oidBeforeUpgrade, _ := test.Commit(repo, nil)
 
 		// do the upgrade
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
@@ -159,7 +159,7 @@ func TestUpgradeCommand(t *testing.T) {
 		test.Commit(repo, nil)
 
 		// do the upgrade
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
@@ -206,7 +206,7 @@ func TestUpgradeCommand(t *testing.T) {
 		assert.False(t, masterOid.Equal(head.Target()))
 
 		// do the upgrade
-		err := UpgradeCommand(repo)
+		err := UpgradeCommand(repo, nil)
 
 		assert.Nil(t, err)
 

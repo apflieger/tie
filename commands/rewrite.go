@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func AmendCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor) error {
+func AmendCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor, pushCallbacks *git.RemoteCallbacks) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
 
 	committer, _ := repo.DefaultSignature()
@@ -27,7 +27,7 @@ func AmendCommand(repo *git.Repository, commitMessage string, openEditor core.Op
 	_, err := headCommit.Amend(head.Name(), headCommit.Author(), committer, core.FormatCommitMessage(commitMessage), tree)
 
 	tipName, _ := core.TipName(head.Name())
-	core.PushTip(repo, tipName)
+	core.PushTip(repo, tipName, pushCallbacks)
 
 	return err
 }
