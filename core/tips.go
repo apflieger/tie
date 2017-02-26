@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/apflieger/tie/env"
 	"gopkg.in/libgit2/git2go.v25"
+	"log"
 	"strings"
 )
 
@@ -77,4 +78,51 @@ func FormatCommitMessage(s string) string {
 		buffer.WriteString(line + "\n")
 	}
 	return buffer.String()
+}
+
+func DeleteTip(repo *git.Repository, logger *log.Logger, tipName string) {
+	// Delete the tip locally
+	tip, _ := repo.References.Lookup(RefsTips + tipName)
+	tip.Delete()
+
+	tail, _ := repo.References.Lookup(RefsTails + tipName)
+	tail.Delete()
+
+	config, _ := repo.Config()
+	baseKey := fmt.Sprintf("tip.%v.base", tipName)
+	base, _ := config.LookupString(baseKey)
+	config.Delete(baseKey)
+
+	// Delete the tip on the remote
+	var pushErr error
+	remoteName, _, err := ExplodeRemoteRef(base)
+	if err == nil {
+		remote, _ := repo.Remotes.Lookup(remoteName)
+		pushOptions := &git.PushOptions{
+			RemoteCallbacks: git.RemoteCallbacks{
+				CredentialsCallback:      env.CredentialCallback,
+				CertificateCheckCallback: env.CertificateCheckCallback,
+			},
+		}
+		refspecs := []string{":" + tip.Name()}
+
+		compat, _ := config.LookupBool("tie.pushTipsAsBranches")
+		if compat {
+			refspecs = append(refspecs, ":refs/heads/tips/"+tipName)
+		}
+
+		pushErr = remote.Push(refspecs, pushOptions)
+
+		if pushErr == nil {
+			rtip, _ := repo.References.Lookup(RefsRemoteTips + remoteName + "/" + tipName)
+			rtip.Delete()
+		}
+	}
+
+	if pushErr != nil {
+		logger.Println(pushErr.Error())
+		logger.Printf("Tip '%v' has been deleted locally but not on %v.\n", tipName, remoteName)
+	} else {
+		logger.Printf("Deleted tip '%v'", tipName)
+	}
 }

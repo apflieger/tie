@@ -59,6 +59,10 @@ func StackCommand(repo *git.Repository, logger *log.Logger) error {
 	}
 
 	repo.References.CreateSymbolic("HEAD", baseRefName, true, "stack tip "+tipName)
+
+	// The tip has been successfully stacked. Now we can delete it.
+	core.DeleteTip(repo, logger, tipName)
+
 	return nil
 }
 

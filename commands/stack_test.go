@@ -29,8 +29,12 @@ func TestStack(t *testing.T) {
 		// Status should be clean
 		test.StatusClean(t, repo)
 
+		// The tip should be deleted
+		_, noTip := repo.References.Lookup(core.RefsTips + "test")
+		assert.NotNil(t, noTip)
+
 		// Output should be...
-		assert.Equal(t, "master <- test (1 commit)\n", out.String())
+		assert.Equal(t, "master <- test (1 commit)\nDeleted tip 'test'\n", out.String())
 	})
 
 	test.RunOnRepo(t, "NotOnTipError", func(t *testing.T, repo *git.Repository) {
@@ -98,6 +102,8 @@ func TestStack(t *testing.T) {
 		// And a 2nd
 		oid, _ := test.Commit(repo, nil)
 
+		core.PushTip(repo, "test")
+
 		// Stack it
 		var out *bytes.Buffer
 		err := StackCommand(repo, test.CreateTestLogger(&out))
@@ -110,7 +116,7 @@ func TestStack(t *testing.T) {
 		assert.True(t, remoteMaster.Target().Equal(oid))
 
 		// Output should be...
-		assert.Equal(t, "origin/master <- test (2 commits)\n", out.String())
+		assert.Equal(t, "origin/master <- test (2 commits)\nDeleted tip 'test'\n", out.String())
 	})
 
 	test.RunOnRemote(t, "RemoteFastForwardError", func(t *testing.T, repo, origin *git.Repository) {

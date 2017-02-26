@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -144,4 +145,98 @@ func TestFormatCommitMessage(t *testing.T) {
 	assert.Equal(t, "test\n", FormatCommitMessage("test\n#comment"))
 	assert.Equal(t, "test\n", FormatCommitMessage("test\n #comment"))
 	assert.Equal(t, "test #not a comment\n", FormatCommitMessage("test #not a comment"))
+}
+
+func TestDeleteTip(t *testing.T) {
+	test.RunOnRepo(t, "LocalTip", func(t *testing.T, repo *git.Repository) {
+		// create a tip with his tail and base
+		test.CreateTip(repo, "test", "refs/heads/master", false)
+
+		var out *bytes.Buffer
+		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+
+		// tip's head should be deleted
+		_, err := repo.References.Lookup(RefsTips + "test")
+		assert.NotNil(t, err)
+		// tip's tail should be deleted
+		_, err = repo.References.Lookup(RefsTails + "test")
+		assert.NotNil(t, err)
+		// tip's base should be deleted
+		config, _ := repo.Config()
+		_, err = config.LookupString("tip.test.base")
+		assert.NotNil(t, err)
+
+		// Output should be...
+		assert.Equal(t, "Deleted tip 'test'\n", out.String())
+	})
+
+	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, repo, remote *git.Repository) {
+		// create a tip with his tail and base
+		tipRefName := RefsTips + "test"
+		head, _ := repo.Head()
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
+
+		// set it up on origin
+		repo.References.Create(RefsRemoteTips+"origin/test", head.Target(), false, "")
+		origin, _ := repo.Remotes.Lookup("origin")
+		origin.Push([]string{tipRefName + ":" + tipRefName}, nil)
+		// activate branch compatibility mode
+		config, _ := repo.Config()
+		config.SetBool("tie.pushTipsAsBranches", true)
+		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
+		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
+
+		var out *bytes.Buffer
+		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+
+		// tip's head should be deleted
+		_, err := repo.References.Lookup(tipRefName)
+		assert.NotNil(t, err)
+		// base config should be deleted
+		_, err = config.LookupString("tip.test.base")
+		assert.NotNil(t, err)
+		// rtip should be deleted
+		_, err = repo.References.Lookup(RefsRemoteTips + "origin/test")
+		assert.NotNil(t, err)
+		// tip on remote should be deleted
+		_, err = remote.References.Lookup(tipRefName)
+		assert.NotNil(t, err)
+
+		// the branch tip should be deleted on origin
+		_, err = remote.References.Lookup("refs/heads/tips/test")
+		assert.NotNil(t, err)
+		// same for the local remote branch
+		_, err = repo.References.Lookup("refs/remotes/origin/tips/test")
+		assert.NotNil(t, err)
+
+		// Output should be...
+		assert.Equal(t, "Deleted tip 'test'\n", out.String())
+	})
+
+	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, repo *git.Repository) {
+		// create a tip with his tail and base on origin/master
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
+
+		head, _ := repo.Head()
+		repo.References.Create(RefsRemoteTips+"origin/test", head.Target(), false, "")
+		// create an unreachable origin remote
+		repo.Remotes.Create("origin", "/dev/null")
+
+		var out *bytes.Buffer
+		DeleteTip(repo, test.CreateTestLogger(&out), "test")
+
+		// tip's head should be deleted
+		_, err := repo.References.Lookup(RefsTips + "test")
+		assert.NotNil(t, err)
+		// base config should be deleted
+		config, _ := repo.Config()
+		_, err = config.LookupString("tip.test.base")
+		assert.NotNil(t, err)
+		// rtip should not be deleted
+		_, err = repo.References.Lookup(RefsRemoteTips + "origin/test")
+		assert.Nil(t, err)
+
+		// Output should be...
+		assert.Contains(t, out.String(), "Tip 'test' has been deleted locally but not on origin.\n")
+	})
 }

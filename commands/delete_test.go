@@ -22,13 +22,9 @@ func TestDeleteCommand(t *testing.T) {
 		// tip's head should be deleted
 		_, err = repo.References.Lookup(core.RefsTips + "test")
 		assert.NotNil(t, err)
-		// tip's tail should be deleted
-		_, err = repo.References.Lookup(core.RefsTails + "test")
-		assert.NotNil(t, err)
-		// tip's base should be deleted
-		config, _ := repo.Config()
-		_, err = config.LookupString("tip.test.base")
-		assert.NotNil(t, err)
+
+		// output should be...
+		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
 	})
 
 	test.RunOnRepo(t, "Branch", func(t *testing.T, repo *git.Repository) {
@@ -68,25 +64,8 @@ func TestDeleteCommand(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		// tip's head should be deleted
-		_, err = repo.References.Lookup(tipRefName)
-		assert.NotNil(t, err)
-		// base config should be deleted
-		_, err = config.LookupString("tip.test.base")
-		assert.NotNil(t, err)
-		// rtip should be deleted
-		_, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
-		assert.NotNil(t, err)
-		// tip on remote should be deleted
-		_, err = remote.References.Lookup(tipRefName)
-		assert.NotNil(t, err)
-
-		// the branch tip should be deleted on origin
-		_, err = remote.References.Lookup("refs/heads/tips/test")
-		assert.NotNil(t, err)
-		// same for the local remote branch
-		_, err = repo.References.Lookup("refs/remotes/origin/tips/test")
-		assert.NotNil(t, err)
+		// output should be...
+		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
 	})
 
 	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, repo *git.Repository) {
@@ -103,15 +82,7 @@ func TestDeleteCommand(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		// tip's head should be deleted
-		_, err = repo.References.Lookup(core.RefsTips + "test")
-		assert.NotNil(t, err)
-		// base config should be deleted
-		config, _ := repo.Config()
-		_, err = config.LookupString("tip.test.base")
-		assert.NotNil(t, err)
-		// rtip should not be deleted
-		_, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
-		assert.Nil(t, err)
+		// output should be...
+		assert.Contains(t, logBuffer.String(), "Tip 'test' has been deleted locally but not on origin")
 	})
 }
