@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestTips(t *testing.T) {
-	test.RunOnRepo(t, "PrepareCommit", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "PrepareCommit", func(t *testing.T, context model.Context, repo *git.Repository) {
 		head, headCommit, tree := PrepareCommit(repo)
 		assert.Equal(t, "refs/heads/master", head.Name())
 		assert.Equal(t, head.Target(), headCommit.Id())
@@ -19,7 +20,7 @@ func TestTips(t *testing.T) {
 }
 
 func TestPushTip(t *testing.T) {
-	test.RunOnRemote(t, "PushSuccess", func(t *testing.T, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "PushSuccess", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
 		// setup a tip based on origin/master
 		head, _ := repo.Head()
 		tip, _ := repo.References.Create(RefsTips+"test", head.Target(), false, "")
@@ -31,7 +32,7 @@ func TestPushTip(t *testing.T) {
 		})
 
 		// push the tip
-		PushTip(repo, "test", nil)
+		PushTip(repo, "test", context)
 
 		// local repo should have a remote tip
 		rtip, err := repo.References.Lookup(RefsRemoteTips + "origin/test")
@@ -44,7 +45,7 @@ func TestPushTip(t *testing.T) {
 		assert.True(t, originTip.Target().Equal(oid))
 	})
 
-	test.RunOnRepo(t, "BaseNotRemote", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "BaseNotRemote", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// setup a tip based on refs/heads/master
 		head, _ := repo.Head()
 		repo.References.Create(RefsTips+"test", head.Target(), false, "")
@@ -52,7 +53,7 @@ func TestPushTip(t *testing.T) {
 		config.SetString("tip.test.base", "refs/heads/master")
 
 		// push the tip
-		err := PushTip(repo, "test", nil)
+		err := PushTip(repo, "test", context)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -62,7 +63,7 @@ func TestPushTip(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRepo(t, "RemoteDoesntExists", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteDoesntExists", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// setup a tip based on refs/remotes/somewhere/master
 		head, _ := repo.Head()
 		repo.References.Create(RefsTips+"test", head.Target(), false, "")
@@ -70,7 +71,7 @@ func TestPushTip(t *testing.T) {
 		config.SetString("tip.test.base", "refs/remotes/somewhere/master")
 
 		// push the tip
-		err := PushTip(repo, "test", nil)
+		err := PushTip(repo, "test", context)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -80,7 +81,7 @@ func TestPushTip(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRepo(t, "RemoteUnreachable", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteUnreachable", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// setup a tip based on refs/remotes/origin/master
 		head, _ := repo.Head()
 		repo.References.Create(RefsTips+"test", head.Target(), false, "")
@@ -90,7 +91,7 @@ func TestPushTip(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		// push the tip
-		err := PushTip(repo, "test", nil)
+		err := PushTip(repo, "test", context)
 
 		// push should have failed
 		assert.NotNil(t, err)
@@ -100,7 +101,7 @@ func TestPushTip(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRemote(t, "BranchCompatibilityMode", func(t *testing.T, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "BranchCompatibilityMode", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
 		// configure the repo to branch compatibility mode
 		config, _ := repo.Config()
 		config.SetBool("tie.pushTipsAsBranches", true)
@@ -115,7 +116,7 @@ func TestPushTip(t *testing.T) {
 		})
 
 		// push the tip
-		err := PushTip(repo, "test", nil)
+		err := PushTip(repo, "test", context)
 		assert.Nil(t, err)
 
 		// local repo should have a remote branch corresponding to the tip
@@ -148,12 +149,12 @@ func TestFormatCommitMessage(t *testing.T) {
 }
 
 func TestDeleteTip(t *testing.T) {
-	test.RunOnRepo(t, "LocalTip", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "LocalTip", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// create a tip with his tail and base
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
 		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")
@@ -170,7 +171,7 @@ func TestDeleteTip(t *testing.T) {
 		assert.Equal(t, "Deleted tip 'test'\n", out.String())
 	})
 
-	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
 		// create a tip with his tail and base
 		tipRefName := RefsTips + "test"
 		head, _ := repo.Head()
@@ -187,7 +188,7 @@ func TestDeleteTip(t *testing.T) {
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
 		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(tipRefName)
@@ -213,7 +214,7 @@ func TestDeleteTip(t *testing.T) {
 		assert.Equal(t, "Deleted tip 'test'\n", out.String())
 	})
 
-	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// create a tip with his tail and base on origin/master
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
 
@@ -223,7 +224,7 @@ func TestDeleteTip(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), nil)
+		DeleteTip(repo, "test", test.CreateTestLogger(&out), context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")

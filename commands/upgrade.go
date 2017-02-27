@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"path/filepath"
@@ -20,7 +21,7 @@ const (
 /**
 Select the given refname. refname can be shorthand.
 */
-func UpgradeCommand(repo *git.Repository, pushCallbacks *git.RemoteCallbacks) error {
+func UpgradeCommand(repo *git.Repository, context model.Context) error {
 	head, _ := repo.Head()
 	tipName, err := core.TipName(head.Name())
 
@@ -63,7 +64,7 @@ func UpgradeCommand(repo *git.Repository, pushCallbacks *git.RemoteCallbacks) er
 	tailRef.SetTarget(baseRef.Target(), "tie upgrade")
 
 	if rebase.OperationCount() > 0 {
-		core.PushTip(repo, tipName, pushCallbacks)
+		core.PushTip(repo, tipName, context)
 	}
 
 	rebase.Free()

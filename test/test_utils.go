@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"fmt"
+	"github.com/apflieger/tie/model"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
@@ -16,11 +17,14 @@ import (
 /*
 The given repo is attached on refs/heads/master, which has one single commit.
 */
-func RunOnRepo(t *testing.T, name string, test func(t *testing.T, repo *git.Repository)) {
+func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context model.Context, repo *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		defer CleanRepo(repo)
-		test(t, repo)
+		context := model.Context{
+			RemoteCallbacks: git.RemoteCallbacks{},
+		}
+		test(t, context, repo)
 	})
 }
 
@@ -29,7 +33,7 @@ The given repo is attached on refs/heads/master, which has one single commit.
 repo has a configured origin remote which repository is passed as argument.
 refs/heads/master is pushed to origin. refs/remotes/origin/master on repo is set.
 */
-func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin *git.Repository)) {
+func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context model.Context, repo, origin *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		origin := CreateTestRepo(true)
@@ -41,7 +45,10 @@ func RunOnRemote(t *testing.T, name string, test func(t *testing.T, repo, origin
 		remote, _ := repo.Remotes.Create("origin", origin.Path())
 		remote.Push([]string{"+refs/heads/master"}, nil)
 
-		test(t, repo, origin)
+		context := model.Context{
+			RemoteCallbacks: git.RemoteCallbacks{},
+		}
+		test(t, context, repo, origin)
 	})
 }
 

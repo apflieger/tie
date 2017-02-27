@@ -2,6 +2,7 @@ package test
 
 import (
 	"bytes"
+	"github.com/apflieger/tie/model"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
@@ -29,7 +30,7 @@ func TestCreateTestLogger(t *testing.T) {
 
 func TestRunOnRemote(t *testing.T) {
 	testRun := false
-	RunOnRemote(t, "NoParams", func(t *testing.T, repo, origin *git.Repository) {
+	RunOnRemote(t, "NoParams", func(t *testing.T, context model.Context, repo, origin *git.Repository) {
 		remote, _ := repo.Remotes.Lookup("origin")
 		assert.Equal(t, origin.Path(), remote.Url())
 		testRun = true
@@ -38,7 +39,7 @@ func TestRunOnRemote(t *testing.T) {
 }
 
 func TestCommit(t *testing.T) {
-	RunOnRepo(t, "NoParams", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "NoParams", func(t *testing.T, context model.Context, repo *git.Repository) {
 		WriteFile(repo, true, "foo", "bar")
 		// commit without params
 		oid, err := Commit(repo, nil)
@@ -60,7 +61,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, "default message", commit.Message())
 	})
 
-	RunOnRepo(t, "RefParam", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "RefParam", func(t *testing.T, context model.Context, repo *git.Repository) {
 		headBefore, _ := repo.Head()
 
 		// commit on a non existing ref
@@ -88,7 +89,7 @@ func TestCommit(t *testing.T) {
 		assert.Equal(t, "default message", commit.Message())
 	})
 
-	RunOnRepo(t, "CommitParams", func(t *testing.T, repo *git.Repository) {
+	RunOnRepo(t, "CommitParams", func(t *testing.T, context model.Context, repo *git.Repository) {
 		now := time.Now()
 		author := &git.Signature{
 			Name:  "Bob Morane",

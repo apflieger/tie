@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"fmt"
+	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"strings"
@@ -17,7 +18,7 @@ func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.C
 	return head, headCommit, treeToCommit
 }
 
-func PushTip(repo *git.Repository, tipName string, pushCallbacks *git.RemoteCallbacks) error {
+func PushTip(repo *git.Repository, tipName string, context model.Context) error {
 	// lookup the remote corresponding to the base of the tip
 	config, _ := repo.Config()
 	base, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
@@ -44,12 +45,10 @@ func PushTip(repo *git.Repository, tipName string, pushCallbacks *git.RemoteCall
 		refspecs = append(refspecs, fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName))
 	}
 
-	var pushOptions *git.PushOptions
-	if pushCallbacks != nil {
-		pushOptions = &git.PushOptions{
-			RemoteCallbacks: *pushCallbacks,
-		}
+	pushOptions := &git.PushOptions{
+		RemoteCallbacks: context.RemoteCallbacks,
 	}
+
 	pushErr := remote.Push(refspecs, pushOptions)
 
 	if pushErr != nil {
@@ -78,7 +77,7 @@ func FormatCommitMessage(s string) string {
 	return buffer.String()
 }
 
-func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, pushCallbacks *git.RemoteCallbacks) {
+func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, context model.Context) {
 	// Delete the tip locally
 	tip, _ := repo.References.Lookup(RefsTips + tipName)
 	tip.Delete()
@@ -96,11 +95,8 @@ func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, pushCal
 	remoteName, _, err := ExplodeRemoteRef(base)
 	if err == nil {
 		remote, _ := repo.Remotes.Lookup(remoteName)
-		var pushOptions *git.PushOptions
-		if pushCallbacks != nil {
-			pushOptions = &git.PushOptions{
-				RemoteCallbacks: *pushCallbacks,
-			}
+		pushOptions := &git.PushOptions{
+			RemoteCallbacks: context.RemoteCallbacks,
 		}
 		refspecs := []string{":" + tip.Name()}
 

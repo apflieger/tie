@@ -2,6 +2,7 @@ package commands
 
 import (
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestCreateCommand(t *testing.T) {
-	test.RunOnRepo(t, "FromHead", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "FromHead", func(t *testing.T, context model.Context, repo *git.Repository) {
 		// create a tip based on HEAD
 		CreateCommand(repo, "test", "")
 
@@ -27,7 +28,7 @@ func TestCreateCommand(t *testing.T) {
 		assert.True(t, tail.Target().Equal(head.Target()))
 	})
 
-	test.RunOnRepo(t, "OnOtherBranch", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "OnOtherBranch", func(t *testing.T, context model.Context, repo *git.Repository) {
 		test.WriteFile(repo, true, "foo", "line")
 		oid, _ := test.Commit(repo, &test.CommitParams{
 			Refname: "refs/remotes/origin/master",
@@ -58,7 +59,7 @@ func TestCreateCommand(t *testing.T) {
 		assert.True(t, tail.Target().Equal(oid))
 	})
 
-	test.RunOnRepo(t, "LocalTipAlreadyExists", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "LocalTipAlreadyExists", func(t *testing.T, context model.Context, repo *git.Repository) {
 		head, _ := repo.Head()
 
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
@@ -71,7 +72,7 @@ func TestCreateCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRepo(t, "BaseDoesntExists", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "BaseDoesntExists", func(t *testing.T, context model.Context, repo *git.Repository) {
 
 		err := CreateCommand(repo, "test", "refs/remotes/github/master")
 
@@ -80,7 +81,7 @@ func TestCreateCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRepo(t, "RemoteTipAlreadyExists", func(t *testing.T, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteTipAlreadyExists", func(t *testing.T, context model.Context, repo *git.Repository) {
 		head, _ := repo.Head()
 
 		repo.References.Create(core.RefsRemoteTips+"github/test", head.Target(), true, "")

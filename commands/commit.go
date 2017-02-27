@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
 	"io/ioutil"
 	"path/filepath"
@@ -12,10 +13,10 @@ import (
 	"strings"
 )
 
-func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.OpenEditor, tipName string, pushCallbacks *git.RemoteCallbacks) error {
+func CommitCommand(repo *git.Repository, commitMessage string, openEditor model.OpenEditor, tipName string, context model.Context) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
 
-	if tipName == core.OptionMissing {
+	if tipName == model.OptionMissing {
 		var notTip error
 		tipName, notTip = core.TipName(head.Name())
 
@@ -29,7 +30,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.O
 			return errors.New("Name of the tip can't be empty.")
 		}
 
-		if tipName == core.OptionWithoutValue {
+		if tipName == model.OptionWithoutValue {
 			tipName, _ = core.RefName(head.Name())
 			tipName = tipName + "-tip"
 		}
@@ -59,7 +60,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor core.O
 	signature, _ := repo.DefaultSignature()
 	repo.CreateCommit(head.Name(), signature, signature, core.FormatCommitMessage(commitMessage), tree, headCommit)
 
-	core.PushTip(repo, tipName, pushCallbacks)
+	core.PushTip(repo, tipName, context)
 
 	return nil
 }

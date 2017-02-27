@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-func RewriteStartCommand(repo *git.Repository) error {
+func RewriteStartCommand(repo *git.Repository, context model.Context) error {
 	head, _ := repo.Head()
 
 	if !strings.HasPrefix(head.Name(), "refs/tips/") {
@@ -29,13 +30,13 @@ func RewriteStartCommand(repo *git.Repository) error {
 	err := runGit(cmd)
 
 	if repo.State() == git.RepositoryStateNone {
-		core.PushTip(repo, tipName, RemoteCallbacks)
+		core.PushTip(repo, tipName, context)
 	}
 
 	return err
 }
 
-func RewriteContinueCommand(repo *git.Repository) error {
+func RewriteContinueCommand(repo *git.Repository, context model.Context) error {
 	if repo.State() != git.RepositoryStateRebaseInteractive {
 		return errors.New("Not in a rewrite sequence.")
 	}
@@ -48,13 +49,13 @@ func RewriteContinueCommand(repo *git.Repository) error {
 	if repo.State() == git.RepositoryStateNone {
 		head, _ := repo.Head()
 		tipName := strings.Replace(head.Name(), "refs/tips/", "", 1)
-		core.PushTip(repo, tipName, RemoteCallbacks)
+		core.PushTip(repo, tipName, context)
 	}
 
 	return err
 }
 
-func RewriteAbortCommand(repo *git.Repository) error {
+func RewriteAbortCommand(repo *git.Repository, context model.Context) error {
 	if repo.State() != git.RepositoryStateRebaseInteractive {
 		return errors.New("Not in a rewrite sequence.")
 	}
