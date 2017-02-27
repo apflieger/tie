@@ -1,7 +1,6 @@
 package test
 
 import (
-	"bytes"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
 	"testing"
@@ -18,13 +17,6 @@ func TestDumbForCodeCoverage(t *testing.T) {
 	MockOpenEditor(nil, "")
 
 	CreateTip(repo, "test", "refs/heads/master", true)
-}
-
-func TestCreateTestLogger(t *testing.T) {
-	var logBuffer *bytes.Buffer
-	logger := CreateTestLogger(&logBuffer)
-	logger.Print("hi")
-	assert.Equal(t, "hi\n", logBuffer.String())
 }
 
 func TestRunOnRemote(t *testing.T) {

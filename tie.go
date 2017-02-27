@@ -180,7 +180,7 @@ func buildListCommand(repo *git.Repository, context model.Context) *cobra.Comman
 		Use:   "list",
 		Short: "List tips and branches",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.ListCommand(repo, context.Logger, listTips, listBranches, listRemotes, listAll)
+			return commands.ListCommand(repo, context, listTips, listBranches, listRemotes, listAll)
 		},
 	}
 
@@ -199,7 +199,7 @@ func buildDeleteCommand(repo *git.Repository, context model.Context) *cobra.Comm
 		Use:   "delete",
 		Short: "Delete tips",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.DeleteCommand(repo, context.Logger, args, context)
+			return commands.DeleteCommand(repo, args, context)
 		},
 	}
 
@@ -211,7 +211,7 @@ func buildStackCommand(repo *git.Repository, context model.Context) *cobra.Comma
 		Use:   "stack",
 		Short: "Put tip's commits into a branch",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.StackCommand(repo, context.Logger, context)
+			return commands.StackCommand(repo, context)
 		},
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
-	"log"
 	"strings"
 )
 
@@ -77,7 +76,7 @@ func FormatCommitMessage(s string) string {
 	return buffer.String()
 }
 
-func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, context model.Context) {
+func DeleteTip(repo *git.Repository, tipName string, context model.Context) {
 	// Delete the tip locally
 	tip, _ := repo.References.Lookup(RefsTips + tipName)
 	tip.Delete()
@@ -114,9 +113,9 @@ func DeleteTip(repo *git.Repository, tipName string, logger *log.Logger, context
 	}
 
 	if pushErr != nil {
-		logger.Println(pushErr.Error())
-		logger.Printf("Tip '%v' has been deleted locally but not on %v.\n", tipName, remoteName)
+		context.Logger.Println(pushErr.Error())
+		context.Logger.Printf("Tip '%v' has been deleted locally but not on %v.\n", tipName, remoteName)
 	} else {
-		logger.Printf("Deleted tip '%v'", tipName)
+		context.Logger.Printf("Deleted tip '%v'", tipName)
 	}
 }

@@ -1,7 +1,6 @@
 package core
 
 import (
-	"bytes"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -152,8 +151,7 @@ func TestDeleteTip(t *testing.T) {
 		// create a tip with his tail and base
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
-		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), context.Context)
+		DeleteTip(repo, "test", context.Context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")
@@ -167,7 +165,7 @@ func TestDeleteTip(t *testing.T) {
 		assert.NotNil(t, err)
 
 		// Output should be...
-		assert.Equal(t, "Deleted tip 'test'\n", out.String())
+		assert.Equal(t, "Deleted tip 'test'\n", context.OutputBuffer.String())
 	})
 
 	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
@@ -186,8 +184,7 @@ func TestDeleteTip(t *testing.T) {
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
-		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), context.Context)
+		DeleteTip(repo, "test", context.Context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(tipRefName)
@@ -210,7 +207,7 @@ func TestDeleteTip(t *testing.T) {
 		assert.NotNil(t, err)
 
 		// Output should be...
-		assert.Equal(t, "Deleted tip 'test'\n", out.String())
+		assert.Equal(t, "Deleted tip 'test'\n", context.OutputBuffer.String())
 	})
 
 	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context test.TestContext, repo *git.Repository) {
@@ -222,8 +219,7 @@ func TestDeleteTip(t *testing.T) {
 		// create an unreachable origin remote
 		repo.Remotes.Create("origin", "/dev/null")
 
-		var out *bytes.Buffer
-		DeleteTip(repo, "test", test.CreateTestLogger(&out), context.Context)
+		DeleteTip(repo, "test", context.Context)
 
 		// tip's head should be deleted
 		_, err := repo.References.Lookup(RefsTips + "test")
@@ -237,6 +233,6 @@ func TestDeleteTip(t *testing.T) {
 		assert.Nil(t, err)
 
 		// Output should be...
-		assert.Contains(t, out.String(), "Tip 'test' has been deleted locally but not on origin.\n")
+		assert.Contains(t, context.OutputBuffer.String(), "Tip 'test' has been deleted locally but not on origin.\n")
 	})
 }

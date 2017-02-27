@@ -2,12 +2,12 @@ package commands
 
 import (
 	"github.com/apflieger/tie/core"
+	"github.com/apflieger/tie/model"
 	"gopkg.in/libgit2/git2go.v25"
-	"log"
 	"sort"
 )
 
-func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remotes, all bool) error {
+func ListCommand(repo *git.Repository, context model.Context, tips, branches, remotes, all bool) error {
 	list := []string{}
 
 	add := func(s string) {
@@ -83,7 +83,7 @@ func ListCommand(repo *git.Repository, logger *log.Logger, tips, branches, remot
 		if ref == directRef.Name() {
 			prefix = "* "
 		}
-		logger.Println(prefix + ref)
+		context.Logger.Println(prefix + ref)
 	}
 
 	return nil

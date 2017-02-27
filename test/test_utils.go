@@ -29,9 +29,9 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context TestCo
 
 		buffer := new(bytes.Buffer)
 		context := TestContext{
-			Context: model.Context {
+			Context: model.Context{
 				RemoteCallbacks: git.RemoteCallbacks{},
-				Logger: log.New(buffer, "", 0),
+				Logger:          log.New(buffer, "", 0),
 			},
 			OutputBuffer: buffer,
 		}
@@ -58,9 +58,9 @@ func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context Test
 
 		buffer := new(bytes.Buffer)
 		context := TestContext{
-			Context: model.Context {
+			Context: model.Context{
 				RemoteCallbacks: git.RemoteCallbacks{},
-				Logger: log.New(buffer, "", 0),
+				Logger:          log.New(buffer, "", 0),
 			},
 			OutputBuffer: buffer,
 		}
@@ -104,12 +104,6 @@ func CreateTestRepo(bare bool) *git.Repository {
 	repo.CreateCommit("HEAD", signature, signature, "First commit", tree, []*git.Commit{}...)
 
 	return repo
-}
-
-func CreateTestLogger(buffer **bytes.Buffer) *log.Logger {
-	b := new(bytes.Buffer)
-	*buffer = b
-	return log.New(*buffer, "", 0)
 }
 
 type CommitParams struct {

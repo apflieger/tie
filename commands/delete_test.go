@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"bytes"
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
@@ -14,8 +13,7 @@ func TestDeleteCommand(t *testing.T) {
 		// create a tip with his tail and base
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
-		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context.Context)
+		err := DeleteCommand(repo, []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 
@@ -24,7 +22,7 @@ func TestDeleteCommand(t *testing.T) {
 		assert.NotNil(t, err)
 
 		// output should be...
-		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
+		assert.Equal(t, "Deleted tip 'test'\n", context.OutputBuffer.String())
 	})
 
 	test.RunOnRepo(t, "Branch", func(t *testing.T, context test.TestContext, repo *git.Repository) {
@@ -32,8 +30,7 @@ func TestDeleteCommand(t *testing.T) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/heads/test", head.Target(), false, "")
 
-		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{"refs/heads/test"}, context.Context)
+		err := DeleteCommand(repo, []string{"refs/heads/test"}, context.Context)
 
 		// tie delete doesn't allow to delete branches
 		assert.NotNil(t, err)
@@ -59,13 +56,12 @@ func TestDeleteCommand(t *testing.T) {
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
-		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{tipRefName}, context.Context)
+		err := DeleteCommand(repo, []string{tipRefName}, context.Context)
 
 		assert.Nil(t, err)
 
 		// output should be...
-		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
+		assert.Equal(t, "Deleted tip 'test'\n", context.OutputBuffer.String())
 	})
 
 	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context test.TestContext, repo *git.Repository) {
@@ -77,12 +73,11 @@ func TestDeleteCommand(t *testing.T) {
 		// create an unreachable origin remote
 		repo.Remotes.Create("origin", "/dev/null")
 
-		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context.Context)
+		err := DeleteCommand(repo, []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 
 		// output should be...
-		assert.Contains(t, logBuffer.String(), "Tip 'test' has been deleted locally but not on origin")
+		assert.Contains(t, context.OutputBuffer.String(), "Tip 'test' has been deleted locally but not on origin")
 	})
 }

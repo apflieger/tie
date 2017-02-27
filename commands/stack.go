@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-func StackCommand(repo *git.Repository, logger *log.Logger, context model.Context) error {
+func StackCommand(repo *git.Repository, context model.Context) error {
 	head, _ := repo.Head()
 	tipName, notTip := core.TipName(head.Name())
 
@@ -36,7 +36,7 @@ func StackCommand(repo *git.Repository, logger *log.Logger, context model.Contex
 		// Base and tail should have the same target for the stack to be allowed.
 		// This guaranty the base to be fastforwarded
 		base.SetTarget(head.Target(), "stack tip "+tipName) // base is not mutated, .Target will still return the previous one
-		printStackInfo(repo, logger, baseRefName, head.Name(), base.Target(), head.Target())
+		printStackInfo(repo, context.Logger, baseRefName, head.Name(), base.Target(), head.Target())
 	} else {
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		pushOptions := &git.PushOptions{
@@ -44,7 +44,7 @@ func StackCommand(repo *git.Repository, logger *log.Logger, context model.Contex
 		}
 
 		pushOptions.RemoteCallbacks.UpdateTipsCallback = func(refname string, a *git.Oid, b *git.Oid) git.ErrorCode {
-			printStackInfo(repo, logger, baseRefName, head.Name(), a, b)
+			printStackInfo(repo, context.Logger, baseRefName, head.Name(), a, b)
 			return git.ErrOk
 		}
 
@@ -60,7 +60,7 @@ func StackCommand(repo *git.Repository, logger *log.Logger, context model.Contex
 	repo.References.CreateSymbolic("HEAD", baseRefName, true, "stack tip "+tipName)
 
 	// The tip has been successfully stacked. Now we can delete it.
-	core.DeleteTip(repo, tipName, logger, context)
+	core.DeleteTip(repo, tipName, context)
 
 	return nil
 }
