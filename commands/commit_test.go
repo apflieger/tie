@@ -21,7 +21,7 @@ func TestCommitCommand(t *testing.T) {
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
 		// tie commit -m "fix typo"
-		err := CommitCommand(repo, "fix typo", nil, model.OptionMissing, context.Context)
+		err := CommitCommand(repo, "fix typo", model.OptionMissing, context.Context)
 		assert.Nil(t, err)
 
 		// We expect the target of head to be one commit ahead, status clear and HEAD still on the tip
@@ -62,11 +62,12 @@ func TestCommitCommand(t *testing.T) {
 		var presetCommitMessage string
 
 		// tie commit with empty commit message
-		CommitCommand(repo, "", func(config *git.Config, file string) (string, error) {
+		context.OpenEditor = func(config *git.Config, file string) (string, error) {
 			bytes, _ := ioutil.ReadFile(file)
 			presetCommitMessage = string(bytes)
 			return "Commit message from mocked editor", nil
-		}, model.OptionMissing, context.Context)
+		}
+		CommitCommand(repo, "", model.OptionMissing, context.Context)
 
 		// The commit message should have been preset with the previous one, commented
 		assert.Equal(t, "#A commit message.\n#With a second line.\n", presetCommitMessage)
@@ -78,7 +79,7 @@ func TestCommitCommand(t *testing.T) {
 	})
 
 	test.RunOnRepo(t, "NotOnTipError", func(t *testing.T, context test.TestContext, repo *git.Repository) {
-		err := CommitCommand(repo, "Commit on master", nil, model.OptionMissing, context.Context)
+		err := CommitCommand(repo, "Commit on master", model.OptionMissing, context.Context)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "HEAD is not on a tip. Run 'commit -t' to create a tip on the fly.", err.Error())
@@ -86,12 +87,12 @@ func TestCommitCommand(t *testing.T) {
 	})
 
 	test.RunOnRepo(t, "OnTheFlyTipEmptyNameError", func(t *testing.T, context test.TestContext, repo *git.Repository) {
-		err := CommitCommand(repo, "Commit on master", nil, "", context.Context)
+		err := CommitCommand(repo, "Commit on master", "", context.Context)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Name of the tip can't be empty.", err.Error())
 		}
 
-		err = CommitCommand(repo, "Commit on master", nil, " ", context.Context)
+		err = CommitCommand(repo, "Commit on master", " ", context.Context)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Name of the tip can't be empty.", err.Error())
 		}
@@ -102,7 +103,7 @@ func TestCommitCommand(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "bar")
 
 		// tie commit -t new_tip -m "Added foo"
-		err := CommitCommand(repo, "Added foo", nil, "new_tip", context.Context)
+		err := CommitCommand(repo, "Added foo", "new_tip", context.Context)
 		assert.Nil(t, err)
 
 		// HEAD should be on new_tip
@@ -128,7 +129,7 @@ func TestCommitCommand(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "bar")
 
 		// tie commit -t new_tip -m "Added foo"
-		err := CommitCommand(repo, "Added foo", nil, model.OptionWithoutValue, context.Context)
+		err := CommitCommand(repo, "Added foo", model.OptionWithoutValue, context.Context)
 		assert.Nil(t, err)
 
 		// HEAD should be on master-tip

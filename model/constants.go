@@ -13,4 +13,5 @@ type OpenEditor func(config *git.Config, file string) (string, error)
 type Context struct {
 	Logger          *log.Logger
 	RemoteCallbacks git.RemoteCallbacks
+	OpenEditor      OpenEditor
 }

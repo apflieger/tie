@@ -185,10 +185,6 @@ func StatusClean(t *testing.T, repo *git.Repository) bool {
 	return assert.Equal(t, 0, statusCount, "status not clean")
 }
 
-func MockOpenEditor(config *git.Config, file string) (string, error) {
-	return "mocked file", nil
-}
-
 func CreateTip(repo *git.Repository, tipName, base string, slct bool) {
 	head, _ := repo.Head()
 	repo.References.Create("refs/tips/"+tipName, head.Target(), false, "")

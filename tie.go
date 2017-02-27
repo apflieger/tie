@@ -35,6 +35,7 @@ func main() {
 			CredentialsCallback:      env.CredentialCallback,
 			CertificateCheckCallback: env.CertificateCheckCallback,
 		},
+		OpenEditor: env.OpenEditor,
 	}
 
 	rootCmd.AddCommand(buildCommitCommand(repo, context))
@@ -56,7 +57,7 @@ func buildCommitCommand(repo *git.Repository, context model.Context) *cobra.Comm
 		Use:   "commit",
 		Short: "Record changes in the currently selected tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.CommitCommand(repo, message, env.OpenEditor, tipName, context)
+			return commands.CommitCommand(repo, message, tipName, context)
 		},
 	}
 
@@ -135,7 +136,7 @@ func buildRewriteCommand(repo *git.Repository, context model.Context) *cobra.Com
 		Use:   "amend",
 		Short: "Meld changes into the previous commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.AmendCommand(repo, message, env.OpenEditor, context)
+			return commands.AmendCommand(repo, message, context)
 		},
 	}
 

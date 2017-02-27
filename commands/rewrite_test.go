@@ -25,7 +25,7 @@ func TestRewriteCommand(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "line1 amended")
 
 		// amend the last commit
-		err := AmendCommand(repo, model.OptionMissing, test.MockOpenEditor, context.Context)
+		err := AmendCommand(repo, model.OptionMissing, context.Context)
 
 		assert.Nil(t, err)
 
@@ -81,11 +81,12 @@ func TestRewriteCommand(t *testing.T) {
 
 		var presetCommitMessage string
 		// amend the last commit using tie rewrite amend -m
-		AmendCommand(repo, model.OptionWithoutValue, func(config *git.Config, file string) (string, error) {
+		context.OpenEditor = func(config *git.Config, file string) (string, error) {
 			bytes, _ := ioutil.ReadFile(file)
 			presetCommitMessage = string(bytes)
 			return "Commit message from mocked editor", nil
-		}, context.Context)
+		}
+		AmendCommand(repo, model.OptionWithoutValue, context.Context)
 
 		assert.Equal(t, "Commit message to be amended\nWith a 2nd line.", presetCommitMessage)
 

@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func CommitCommand(repo *git.Repository, commitMessage string, openEditor model.OpenEditor, tipName string, context model.Context) error {
+func CommitCommand(repo *git.Repository, commitMessage string, tipName string, context model.Context) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
 
 	if tipName == model.OptionMissing {
@@ -54,7 +54,7 @@ func CommitCommand(repo *git.Repository, commitMessage string, openEditor model.
 		ioutil.WriteFile(commitEditMsgFile, presetCommitMessage.Bytes(), 0644)
 
 		config, _ := repo.Config()
-		commitMessage, _ = openEditor(config, commitEditMsgFile)
+		commitMessage, _ = context.OpenEditor(config, commitEditMsgFile)
 	}
 
 	signature, _ := repo.DefaultSignature()

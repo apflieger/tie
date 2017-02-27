@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func AmendCommand(repo *git.Repository, commitMessage string, openEditor model.OpenEditor, context model.Context) error {
+func AmendCommand(repo *git.Repository, commitMessage string, context model.Context) error {
 	head, headCommit, tree := core.PrepareCommit(repo)
 
 	committer, _ := repo.DefaultSignature()
@@ -22,7 +22,7 @@ func AmendCommand(repo *git.Repository, commitMessage string, openEditor model.O
 		commitEditMsgFile := filepath.Join(repo.Path(), "COMMIT_EDITMSG")
 		ioutil.WriteFile(commitEditMsgFile, []byte(headCommit.Message()), 0644)
 
-		commitMessage, _ = openEditor(config, commitEditMsgFile)
+		commitMessage, _ = context.OpenEditor(config, commitEditMsgFile)
 	}
 
 	_, err := headCommit.Amend(head.Name(), headCommit.Author(), committer, core.FormatCommitMessage(commitMessage), tree)
