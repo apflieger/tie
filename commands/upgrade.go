@@ -48,7 +48,11 @@ func UpgradeCommand(repo *git.Repository, pushCallbacks *git.RemoteCallbacks) er
 
 	rebaseOpts, _ := git.DefaultRebaseOptions()
 
-	rebase, _ := repo.InitRebase(annotatedHeadCommit, annotatedUpstreamCommit, annotatedOntoCommit, rebaseOpts)
+	rebase, err := repo.InitRebase(annotatedHeadCommit, annotatedUpstreamCommit, annotatedOntoCommit, rebaseOpts)
+
+	if err != nil {
+		return err
+	}
 
 	err = iterate(repo, rebase)
 

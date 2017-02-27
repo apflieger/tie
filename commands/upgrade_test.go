@@ -225,4 +225,18 @@ func TestUpgradeCommand(t *testing.T) {
 		_, err = repo.References.Lookup(core.RefsRemoteTips + "origin/test")
 		assert.NotNil(t, err)
 	})
+
+	test.RunOnRepo(t, "DirtyStateError", func(t *testing.T, repo *git.Repository) {
+		// create a tip on head based on refs/remotes/origin/master
+		test.CreateTip(repo, "test", "refs/heads/master", true)
+
+		test.WriteFile(repo, true, "foo", "line")
+		test.Commit(repo, nil)
+
+		test.WriteFile(repo, false, "foo", "bar")
+
+		err := UpgradeCommand(repo, nil)
+
+		assert.NotNil(t, err)
+	})
 }
