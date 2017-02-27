@@ -12,7 +12,7 @@ import (
 )
 
 func TestRewriteCommand(t *testing.T) {
-	test.RunOnRemote(t, "AmendHeadTree", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "AmendHeadTree", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
@@ -25,7 +25,7 @@ func TestRewriteCommand(t *testing.T) {
 		test.WriteFile(repo, true, "foo", "line1 amended")
 
 		// amend the last commit
-		err := AmendCommand(repo, model.OptionMissing, test.MockOpenEditor, context)
+		err := AmendCommand(repo, model.OptionMissing, test.MockOpenEditor, context.Context)
 
 		assert.Nil(t, err)
 
@@ -70,7 +70,7 @@ func TestRewriteCommand(t *testing.T) {
 		assert.Equal(t, "first commit\n", headCommit.Message())
 	})
 
-	test.RunOnRemote(t, "AmendHeadMessage", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "AmendHeadMessage", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// commit a file on a new tip
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
@@ -85,7 +85,7 @@ func TestRewriteCommand(t *testing.T) {
 			bytes, _ := ioutil.ReadFile(file)
 			presetCommitMessage = string(bytes)
 			return "Commit message from mocked editor", nil
-		}, context)
+		}, context.Context)
 
 		assert.Equal(t, "Commit message to be amended\nWith a 2nd line.", presetCommitMessage)
 

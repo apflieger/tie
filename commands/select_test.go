@@ -2,7 +2,6 @@ package commands
 
 import (
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -10,7 +9,7 @@ import (
 )
 
 func TestSelectCommand(t *testing.T) {
-	test.RunOnRepo(t, "SelectTip", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "SelectTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		head, _ := repo.Head()
 
 		// New tip ref created on HEAD
@@ -27,7 +26,7 @@ func TestSelectCommand(t *testing.T) {
 		assert.Equal(t, core.RefsTips+"test", head.Name())
 	})
 
-	test.RunOnRepo(t, "DwimFailed", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "DwimFailed", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		err := SelectCommand(repo, "test")
 
 		if assert.NotNil(t, err) {
@@ -35,7 +34,7 @@ func TestSelectCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRepo(t, "DirtyState", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "DirtyState", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// Commit a file on a new tip
 		test.WriteFile(repo, true, "foo", "a")
 		test.Commit(repo, &test.CommitParams{Refname: core.RefsTips + "test"})

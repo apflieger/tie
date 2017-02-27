@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -11,12 +10,12 @@ import (
 )
 
 func TestDeleteCommand(t *testing.T) {
-	test.RunOnRepo(t, "LocalTip", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "LocalTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create a tip with his tail and base
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context)
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 
@@ -28,13 +27,13 @@ func TestDeleteCommand(t *testing.T) {
 		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
 	})
 
-	test.RunOnRepo(t, "Branch", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "Branch", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create a local branch
 		head, _ := repo.Head()
 		repo.References.Create("refs/heads/test", head.Target(), false, "")
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{"refs/heads/test"}, context)
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{"refs/heads/test"}, context.Context)
 
 		// tie delete doesn't allow to delete branches
 		assert.NotNil(t, err)
@@ -44,7 +43,7 @@ func TestDeleteCommand(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "RemoteTip", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// create a tip with his tail and base
 		tipRefName := core.RefsTips + "test"
 		head, _ := repo.Head()
@@ -61,7 +60,7 @@ func TestDeleteCommand(t *testing.T) {
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{tipRefName}, context)
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{tipRefName}, context.Context)
 
 		assert.Nil(t, err)
 
@@ -69,7 +68,7 @@ func TestDeleteCommand(t *testing.T) {
 		assert.Equal(t, "Deleted tip 'test'\n", logBuffer.String())
 	})
 
-	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create a tip with his tail and base on origin/master
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
 
@@ -79,7 +78,7 @@ func TestDeleteCommand(t *testing.T) {
 		repo.Remotes.Create("origin", "/dev/null")
 
 		var logBuffer *bytes.Buffer
-		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context)
+		err := DeleteCommand(repo, test.CreateTestLogger(&logBuffer), []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 

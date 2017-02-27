@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -9,7 +8,7 @@ import (
 )
 
 func TestDwim(t *testing.T) {
-	test.RunOnRepo(t, "SelectTip", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "SelectTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		head, _ := repo.Head()
 		repo.References.Create(RefsTips+"test", head.Target(), true, "")
 		repo.References.Create(RefsRemoteTips+"origin/testorigin", head.Target(), true, "")

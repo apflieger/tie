@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -43,7 +42,7 @@ func TestListCommand(t *testing.T) {
 		assert.Equal(t, expectedBuffer.String(), buffer.String())
 	}
 
-	test.RunOnRepo(t, "DefaultListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "DefaultListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false, false)
@@ -54,7 +53,7 @@ func TestListCommand(t *testing.T) {
 			"refs/remotes/origin/branch2") // configured as base of a tip
 	})
 
-	test.RunOnRepo(t, "TipsListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "TipsListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, false, false)
@@ -63,7 +62,7 @@ func TestListCommand(t *testing.T) {
 			core.RefsTips+"tip2")
 	})
 
-	test.RunOnRepo(t, "BranchListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "BranchListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, false, false)
@@ -72,7 +71,7 @@ func TestListCommand(t *testing.T) {
 			"refs/heads/master")
 	})
 
-	test.RunOnRepo(t, "RemoteListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, true, false)
@@ -83,7 +82,7 @@ func TestListCommand(t *testing.T) {
 			"refs/remotes/origin/branch2")
 	})
 
-	test.RunOnRepo(t, "RemoteTipsListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteTipsListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, true, false)
@@ -92,7 +91,7 @@ func TestListCommand(t *testing.T) {
 			core.RefsRemoteTips+"origin/tip3")
 	})
 
-	test.RunOnRepo(t, "RemoteBranchListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "RemoteBranchListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, true, false)
@@ -101,7 +100,7 @@ func TestListCommand(t *testing.T) {
 			"refs/remotes/origin/branch2")
 	})
 
-	test.RunOnRepo(t, "LocalListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "LocalListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, true, false, false)
@@ -112,7 +111,7 @@ func TestListCommand(t *testing.T) {
 			"refs/heads/master")
 	})
 
-	test.RunOnRepo(t, "AllListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "AllListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, false, false, true)
@@ -127,7 +126,7 @@ func TestListCommand(t *testing.T) {
 			"refs/remotes/origin/branch2")
 	})
 
-	test.RunOnRepo(t, "AllTipsListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "AllTipsListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), true, false, false, true)
@@ -138,7 +137,7 @@ func TestListCommand(t *testing.T) {
 			core.RefsRemoteTips+"origin/tip3")
 	})
 
-	test.RunOnRepo(t, "AllBranchesListing", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "AllBranchesListing", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		setupRefs(repo)
 		var logBuffer *bytes.Buffer
 		ListCommand(repo, test.CreateTestLogger(&logBuffer), false, true, false, true)

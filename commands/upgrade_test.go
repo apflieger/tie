@@ -2,7 +2,6 @@ package commands
 
 import (
 	"github.com/apflieger/tie/core"
-	"github.com/apflieger/tie/model"
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
@@ -11,21 +10,21 @@ import (
 )
 
 func TestUpgradeCommand(t *testing.T) {
-	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, context model.Context, repo *git.Repository) {
-		err := UpgradeCommand(repo, context)
+	test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		err := UpgradeCommand(repo, context.Context)
 
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "HEAD not on a tip. Only tips can be upgraded.", err.Error())
 		}
 	})
 
-	test.RunOnRepo(t, "NoBase", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "NoBase", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create and select a tip
 		head, _ := repo.Head()
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
 		repo.References.CreateSymbolic("HEAD", core.RefsTips+"test", true, "")
 
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 
 		// upgrade requires a base to be defined
 		if assert.NotNil(t, err) {
@@ -33,7 +32,7 @@ func TestUpgradeCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRepo(t, "NoTail", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "NoTail", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create and select a tip
 		head, _ := repo.Head()
 		repo.References.Create(core.RefsTips+"test", head.Target(), true, "")
@@ -43,7 +42,7 @@ func TestUpgradeCommand(t *testing.T) {
 		config, _ := repo.Config()
 		config.SetString("tip.test.base", "refs/remotes/origin/master")
 
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 
 		// upgrade requires the tip to have a tail
 		if assert.NotNil(t, err) {
@@ -51,7 +50,7 @@ func TestUpgradeCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRemote(t, "UpgradeSuccess", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "UpgradeSuccess", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// create a tip on head based on refs/remotes/origin/master
 		head, _ := repo.Head()
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
@@ -78,7 +77,7 @@ func TestUpgradeCommand(t *testing.T) {
 		})
 
 		// do the upgrade
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 		assert.Nil(t, err)
 
 		// we expect the tip to be on top of origin/master
@@ -104,7 +103,7 @@ func TestUpgradeCommand(t *testing.T) {
 		}
 	})
 
-	test.RunOnRemote(t, "ConflictAbort", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "ConflictAbort", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// create a tip on head based on master
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
@@ -124,7 +123,7 @@ func TestUpgradeCommand(t *testing.T) {
 		oidBeforeUpgrade, _ := test.Commit(repo, nil)
 
 		// do the upgrade
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
@@ -142,7 +141,7 @@ func TestUpgradeCommand(t *testing.T) {
 		assert.True(t, tail.Target().Equal(tailBeforeUpgrade))
 	})
 
-	test.RunOnRemote(t, "ConflictContinue", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "ConflictContinue", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		head, _ := repo.Head()
 		// create a tip on head based on master
 		test.CreateTip(repo, "test", "refs/heads/master", false)
@@ -160,7 +159,7 @@ func TestUpgradeCommand(t *testing.T) {
 		test.Commit(repo, nil)
 
 		// do the upgrade
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 		if assert.NotNil(t, err) {
 			assert.Equal(t, "Conflict while upgrading", err.Error())
 		}
@@ -194,7 +193,7 @@ func TestUpgradeCommand(t *testing.T) {
 
 	})
 
-	test.RunOnRemote(t, "UpgradeEmptyTip", func(t *testing.T, context model.Context, repo, remote *git.Repository) {
+	test.RunOnRemote(t, "UpgradeEmptyTip", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// create a tip on head based on origin/master
 		head, _ := repo.Head()
 		repo.References.Create("refs/remotes/origin/master", head.Target(), true, "")
@@ -207,7 +206,7 @@ func TestUpgradeCommand(t *testing.T) {
 		assert.False(t, masterOid.Equal(head.Target()))
 
 		// do the upgrade
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 
 		assert.Nil(t, err)
 
@@ -227,7 +226,7 @@ func TestUpgradeCommand(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
-	test.RunOnRepo(t, "DirtyStateError", func(t *testing.T, context model.Context, repo *git.Repository) {
+	test.RunOnRepo(t, "DirtyStateError", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create a tip on head based on refs/remotes/origin/master
 		test.CreateTip(repo, "test", "refs/heads/master", true)
 
@@ -236,7 +235,7 @@ func TestUpgradeCommand(t *testing.T) {
 
 		test.WriteFile(repo, false, "foo", "bar")
 
-		err := UpgradeCommand(repo, context)
+		err := UpgradeCommand(repo, context.Context)
 
 		assert.NotNil(t, err)
 	})

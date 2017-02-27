@@ -14,15 +14,26 @@ import (
 	"testing"
 )
 
+type TestContext struct {
+	model.Context
+	OutputBuffer *bytes.Buffer
+}
+
 /*
 The given repo is attached on refs/heads/master, which has one single commit.
 */
-func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context model.Context, repo *git.Repository)) {
+func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context TestContext, repo *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		defer CleanRepo(repo)
-		context := model.Context{
-			RemoteCallbacks: git.RemoteCallbacks{},
+
+		buffer := new(bytes.Buffer)
+		context := TestContext{
+			Context: model.Context {
+				RemoteCallbacks: git.RemoteCallbacks{},
+				Logger: log.New(buffer, "", 0),
+			},
+			OutputBuffer: buffer,
 		}
 		test(t, context, repo)
 	})
@@ -33,7 +44,7 @@ The given repo is attached on refs/heads/master, which has one single commit.
 repo has a configured origin remote which repository is passed as argument.
 refs/heads/master is pushed to origin. refs/remotes/origin/master on repo is set.
 */
-func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context model.Context, repo, origin *git.Repository)) {
+func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context TestContext, repo, origin *git.Repository)) {
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		origin := CreateTestRepo(true)
@@ -45,8 +56,13 @@ func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context mode
 		remote, _ := repo.Remotes.Create("origin", origin.Path())
 		remote.Push([]string{"+refs/heads/master"}, nil)
 
-		context := model.Context{
-			RemoteCallbacks: git.RemoteCallbacks{},
+		buffer := new(bytes.Buffer)
+		context := TestContext{
+			Context: model.Context {
+				RemoteCallbacks: git.RemoteCallbacks{},
+				Logger: log.New(buffer, "", 0),
+			},
+			OutputBuffer: buffer,
 		}
 		test(t, context, repo, origin)
 	})
