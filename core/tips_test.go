@@ -224,13 +224,13 @@ func TestDeleteTip(t *testing.T) {
 		remote.Push([]string{tipRefName + ":" + tipRefName}, nil)
 
 		// Check to be sure it's there
-		_, noRtip := repo.References.Lookup(RefsRemoteTips+"origin/test")
+		_, noRtip := repo.References.Lookup(RefsRemoteTips + "origin/test")
 		assert.Nil(t, noRtip)
 
 		DeleteTip(repo, "test", context.Context)
 
 		// rtip should be deleted
-		_, noRtip = repo.References.Lookup(RefsRemoteTips+"origin/test")
+		_, noRtip = repo.References.Lookup(RefsRemoteTips + "origin/test")
 		assert.NotNil(t, noRtip)
 	})
 

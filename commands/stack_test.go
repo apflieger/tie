@@ -160,7 +160,25 @@ func TestStack(t *testing.T) {
 		err := StackCommand(repo, context.Context)
 
 		// Stack doesn't allow to stack on tips for now
-		assert.NotNil(t, err)
+		if assert.NotNil(t, err) {
+			assert.Contains(t, err.Error(), "Tips can only be stacked on branches")
+		}
+	})
+
+	test.RunOnRepo(t, "LocalTipError", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		// Create a tip on a remote tip
+		test.CreateTip(repo, "test1", "refs/heads/master", true)
+		test.Commit(repo, nil)
+		test.CreateTip(repo, "test2", core.RefsTips+"test1", true)
+		test.Commit(repo, nil)
+
+		// Stack it
+		err := StackCommand(repo, context.Context)
+
+		// Stack doesn't allow to stack on tips for now
+		if assert.NotNil(t, err) {
+			assert.Contains(t, err.Error(), "Tips can only be stacked on branches")
+		}
 	})
 
 	test.RunOnRemote(t, "TwoTipStackError", func(t *testing.T, context test.TestContext, repo, origin *git.Repository) {

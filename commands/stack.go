@@ -21,12 +21,12 @@ func StackCommand(repo *git.Repository, context model.Context) error {
 	baseRefName, _ := config.LookupString(fmt.Sprintf("tip.%v.base", tipName))
 
 	remoteName, pushRef, notRemote := core.ExplodeRemoteRef(baseRefName)
+	base, _ := repo.References.Lookup(baseRefName)
 
-	if notRemote == nil && !core.IsBranch(pushRef) {
+	if !base.IsBranch() && !core.IsBranch(pushRef) {
 		return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches.", baseRefName)
 	}
 
-	base, _ := repo.References.Lookup(baseRefName)
 	tail, _ := repo.References.Lookup(core.RefsTails + tipName)
 	if !tail.Target().Equal(base.Target()) {
 		return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please upgrade\n", tipName, baseRefName)
