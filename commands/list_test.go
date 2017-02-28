@@ -137,4 +137,13 @@ func TestListCommand(t *testing.T) {
 			"refs/remotes/github/branch3",
 			"refs/remotes/origin/branch2")
 	})
+
+	test.RunOnRepo(t, "BaseDoesntExist", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		config, _ := repo.Config()
+		config.SetString("tip.test.base", "refs/heads/non-existing-branch")
+		test.CreateTip(repo, "test", "refs/heads/non-existing-branch", true)
+		ListCommand(repo, context.Context, false, false, false, false)
+		assertRefsList(t, repo, context,
+			core.RefsTips+"test")
+	})
 }

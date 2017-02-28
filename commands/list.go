@@ -52,7 +52,12 @@ func ListCommand(repo *git.Repository, context model.Context, tips, branches, re
 		config, _ := repo.Config()
 		it, _ := config.NewIteratorGlob("tip.*.base")
 		for entry, end := it.Next(); end == nil; entry, end = it.Next() {
-			add(entry.Value)
+			// Bases may be old refs that doesn't exist anymore.
+			// Don't allow them to be listed.
+			_, err := repo.References.Lookup(entry.Value)
+			if err == nil {
+				add(entry.Value)
+			}
 		}
 	}
 
