@@ -1,7 +1,6 @@
 package env
 
 import (
-	"bytes"
 	"errors"
 	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/model"
@@ -29,11 +28,11 @@ func RewriteStartCommand(repo *git.Repository, context model.Context) error {
 
 	err := runGit(cmd)
 
-	if repo.State() == git.RepositoryStateNone {
+	if err == nil && repo.State() == git.RepositoryStateNone {
 		core.PushTip(repo, tipName, context)
 	}
 
-	return err
+	return nil
 }
 
 func RewriteContinueCommand(repo *git.Repository, context model.Context) error {
@@ -46,13 +45,13 @@ func RewriteContinueCommand(repo *git.Repository, context model.Context) error {
 
 	err := runGit(cmd)
 
-	if repo.State() == git.RepositoryStateNone {
+	if err == nil && repo.State() == git.RepositoryStateNone {
 		head, _ := repo.Head()
 		tipName := strings.Replace(head.Name(), "refs/tips/", "", 1)
 		core.PushTip(repo, tipName, context)
 	}
 
-	return err
+	return nil
 }
 
 func RewriteAbortCommand(repo *git.Repository, context model.Context) error {
@@ -63,12 +62,13 @@ func RewriteAbortCommand(repo *git.Repository, context model.Context) error {
 	cmd := exec.Command("git", "-C", repo.Workdir(),
 		"rebase", "--abort")
 
-	return runGit(cmd)
+	runGit(cmd)
+
+	return nil
 }
 
 func runGit(cmd *exec.Cmd) error {
-	errOut := new(bytes.Buffer)
-	cmd.Stderr = errOut
+	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	cmd.Stdin = os.Stdin
 	err := cmd.Run()
