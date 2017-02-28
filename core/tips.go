@@ -107,8 +107,10 @@ func DeleteTip(repo *git.Repository, tipName string, context model.Context) {
 		pushErr = remote.Push(refspecs, pushOptions)
 
 		if pushErr == nil {
-			rtip, _ := repo.References.Lookup(RefsRemoteTips + remoteName + "/" + tipName)
-			rtip.Delete()
+			rtip, noRtip := repo.References.Lookup(RefsRemoteTips + remoteName + "/" + tipName)
+			if noRtip == nil {
+				rtip.Delete()
+			}
 		}
 	}
 

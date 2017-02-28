@@ -210,6 +210,30 @@ func TestDeleteTip(t *testing.T) {
 		assert.Equal(t, "Deleted tip 'test'\n", context.OutputBuffer.String())
 	})
 
+	test.RunOnRemote(t, "RemoteTipAlreadyDeleted", func(t *testing.T, context test.TestContext, repo, origin *git.Repository) {
+		// create a tip with his tail and base
+		tipRefName := RefsTips + "test"
+		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
+
+		// Configure fetch refspec.
+		// This changes the behavior of remote.Push, it will delete local ref after a delete push
+		config, _ := repo.Config()
+		config.SetString("remote.origin.fetch", "+refs/tips/*:refs/rtips/origin/*")
+
+		remote, _ := repo.Remotes.Lookup("origin")
+		remote.Push([]string{tipRefName + ":" + tipRefName}, nil)
+
+		// Check to be sure it's there
+		_, noRtip := repo.References.Lookup(RefsRemoteTips+"origin/test")
+		assert.Nil(t, noRtip)
+
+		DeleteTip(repo, "test", context.Context)
+
+		// rtip should be deleted
+		_, noRtip = repo.References.Lookup(RefsRemoteTips+"origin/test")
+		assert.NotNil(t, noRtip)
+	})
+
 	test.RunOnRepo(t, "UnreachableRemote", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		// create a tip with his tail and base on origin/master
 		test.CreateTip(repo, "test", "refs/remotes/origin/master", false)
