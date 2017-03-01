@@ -26,6 +26,7 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context TestCo
 	t.Run(name, func(t *testing.T) {
 		repo := CreateTestRepo(false)
 		defer CleanRepo(repo)
+		//fmt.Println("repo: " + repo.Workdir())
 
 		buffer := new(bytes.Buffer)
 		context := TestContext{
@@ -157,7 +158,8 @@ func Commit(repo *git.Repository, params *CommitParams) (*git.Oid, error) {
 	createdOid, err := repo.CreateCommit(params.Refname, params.Author, params.Commiter, params.Message, tree, parent)
 
 	if reset {
-		repo.ResetToCommit(parent, git.ResetHard, &git.CheckoutOpts{Strategy: git.CheckoutForce})
+		parentTree, _ := parent.Tree()
+		repo.CheckoutTree(parentTree, &git.CheckoutOpts{Strategy: git.CheckoutForce})
 	}
 
 	return createdOid, err

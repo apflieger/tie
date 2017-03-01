@@ -26,6 +26,46 @@ func TestSelectCommand(t *testing.T) {
 		assert.Equal(t, core.RefsTips+"test", head.Name())
 	})
 
+	// This test demonstrates a problem when using git fetch while being attached to a remote ref
+	// Don't support this for now.
+	/*test.RunOnRepo(t, "UpdatedRef", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		// Commit a file on master
+		test.WriteFile(repo, true, "foo", "a")
+		test.Commit(repo, nil)
+
+		// Create origin/master on HEAD
+		head, _ := repo.Head()
+		repo.References.Create("refs/remotes/origin/master", head.Target(), false, "")
+
+		// Select origin/master
+		SelectCommand(repo, "refs/remotes/origin/master")
+
+		// Commit a change on origin/master (this simulates a fetch)
+		test.WriteFile(repo, true, "foo", "b")
+		test.Commit(repo, &test.CommitParams{Refname: "refs/remotes/origin/master"})
+
+		// After the fetch, the working tree becomes dirty
+		statusList, _ := repo.StatusList(
+			&git.StatusOptions{
+				Show:     git.StatusShowIndexAndWorkdir,
+				Flags:    git.StatusOptIncludeUntracked,
+				Pathspec: nil,
+			})
+		statusCount, _ := statusList.EntryCount()
+		assert.Equal(t, 1, statusCount)
+
+		// re-select origin/master should clean the status
+		err := SelectCommand(repo, "refs/remotes/origin/master")
+
+		assert.Nil(t, err)
+
+		test.StatusClean(t, repo)
+
+		// The working tree should have the last change
+		foo, _ := ioutil.ReadFile(filepath.Join(repo.Workdir(), "foo"))
+		assert.Equal(t, "b", string(foo))
+	})*/
+
 	test.RunOnRepo(t, "DwimFailed", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 		err := SelectCommand(repo, "test")
 
