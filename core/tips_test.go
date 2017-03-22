@@ -102,7 +102,7 @@ func TestPushTip(t *testing.T) {
 	test.RunOnRemote(t, "BranchCompatibilityMode", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// configure the repo to branch compatibility mode
 		config, _ := repo.Config()
-		config.SetBool("tie.pushTipsAsBranches", true)
+		config.SetString("tie.pushTipsAs", "refs/heads/tips/")
 
 		// setup a tip based on origin/master
 		head, _ := repo.Head()
@@ -119,13 +119,15 @@ func TestPushTip(t *testing.T) {
 
 		// local repo should have a remote branch corresponding to the tip
 		rBranch, err := repo.References.Lookup("refs/remotes/origin/tips/test")
-		assert.Nil(t, err)
-		assert.True(t, rBranch.Target().Equal(oid))
+		if assert.Nil(t, err) {
+			assert.True(t, rBranch.Target().Equal(oid))
+		}
 
 		// remote repo should have a local branch corresponding to the tip
 		originBranch, err := remote.References.Lookup("refs/heads/tips/test")
-		assert.Nil(t, err)
-		assert.True(t, originBranch.Target().Equal(oid))
+		if assert.Nil(t, err) {
+			assert.True(t, originBranch.Target().Equal(oid))
+		}
 	})
 }
 
@@ -180,9 +182,9 @@ func TestDeleteTip(t *testing.T) {
 		origin.Push([]string{tipRefName + ":" + tipRefName}, nil)
 		// activate branch compatibility mode
 		config, _ := repo.Config()
-		config.SetBool("tie.pushTipsAsBranches", true)
+		config.SetString("tie.pushTipsAs", "refs/heads/apflieger/")
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
-		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
+		origin.Push([]string{tipRefName + ":refs/heads/apflieger/test"}, nil)
 
 		DeleteTip(repo, "test", context.Context)
 
@@ -200,10 +202,10 @@ func TestDeleteTip(t *testing.T) {
 		assert.NotNil(t, err)
 
 		// the branch tip should be deleted on origin
-		_, err = remote.References.Lookup("refs/heads/tips/test")
+		_, err = remote.References.Lookup("refs/heads/apflieger/test")
 		assert.NotNil(t, err)
 		// same for the local remote branch
-		_, err = repo.References.Lookup("refs/remotes/origin/tips/test")
+		_, err = repo.References.Lookup("refs/remotes/origin/apflieger/test")
 		assert.NotNil(t, err)
 
 		// Output should be...

@@ -38,10 +38,10 @@ func PushTip(repo *git.Repository, tipName string, context model.Context) error 
 	refspecs := []string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}
 
 	// handle branch compatibility mode
-	compat, _ := config.LookupBool("tie.pushTipsAsBranches")
+	compat, noPushErr := config.LookupString("tie.pushTipsAs")
 
-	if compat {
-		refspecs = append(refspecs, fmt.Sprintf("+%v:refs/heads/tips/%v", RefsTips+tipName, tipName))
+	if noPushErr == nil {
+		refspecs = append(refspecs, fmt.Sprintf("+%v:%v%v", RefsTips+tipName, compat, tipName))
 	}
 
 	pushOptions := &git.PushOptions{
@@ -99,9 +99,9 @@ func DeleteTip(repo *git.Repository, tipName string, context model.Context) {
 		}
 		refspecs := []string{":" + tip.Name()}
 
-		compat, _ := config.LookupBool("tie.pushTipsAsBranches")
-		if compat {
-			refspecs = append(refspecs, ":refs/heads/tips/"+tipName)
+		compatRef, noCompatErr := config.LookupString("tie.pushTipsAs")
+		if noCompatErr == nil {
+			refspecs = append(refspecs, ":"+compatRef+tipName)
 		}
 
 		pushErr = remote.Push(refspecs, pushOptions)
