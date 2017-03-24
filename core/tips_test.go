@@ -102,7 +102,7 @@ func TestPushTip(t *testing.T) {
 	test.RunOnRemote(t, "BranchCompatibilityMode", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
 		// configure the repo to branch compatibility mode
 		config, _ := repo.Config()
-		config.SetString("tie.pushTipsAs", "refs/heads/tips/")
+		config.SetString(PushTipsAsConfigKey, "refs/heads/tips/")
 
 		// setup a tip based on origin/master
 		head, _ := repo.Head()
@@ -182,7 +182,7 @@ func TestDeleteTip(t *testing.T) {
 		origin.Push([]string{tipRefName + ":" + tipRefName}, nil)
 		// activate branch compatibility mode
 		config, _ := repo.Config()
-		config.SetString("tie.pushTipsAs", "refs/heads/apflieger/")
+		config.SetString(PushTipsAsConfigKey, "refs/heads/apflieger/")
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
 		origin.Push([]string{tipRefName + ":refs/heads/apflieger/test"}, nil)
 

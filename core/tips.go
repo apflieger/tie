@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const PushTipsAsConfigKey = "tie.pushTipsAs"
+
 func PrepareCommit(repo *git.Repository) (head *git.Reference, headCommit *git.Commit, treeToCommit *git.Tree) {
 	head, _ = repo.Head()
 	index, _ := repo.Index()
@@ -38,7 +40,7 @@ func PushTip(repo *git.Repository, tipName string, context model.Context) error 
 	refspecs := []string{fmt.Sprintf("+%v:%v", RefsTips+tipName, RefsTips+tipName)}
 
 	// handle branch compatibility mode
-	compat, noPushErr := config.LookupString("tie.pushTipsAs")
+	compat, noPushErr := config.LookupString(PushTipsAsConfigKey)
 
 	if noPushErr == nil {
 		refspecs = append(refspecs, fmt.Sprintf("+%v:%v%v", RefsTips+tipName, compat, tipName))
@@ -99,7 +101,7 @@ func DeleteTip(repo *git.Repository, tipName string, context model.Context) {
 		}
 		refspecs := []string{":" + tip.Name()}
 
-		compatRef, noCompatErr := config.LookupString("tie.pushTipsAs")
+		compatRef, noCompatErr := config.LookupString(PushTipsAsConfigKey)
 		if noCompatErr == nil {
 			refspecs = append(refspecs, ":"+compatRef+tipName)
 		}

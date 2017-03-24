@@ -52,7 +52,7 @@ func TestDeleteCommand(t *testing.T) {
 		origin.Push([]string{tipRefName + ":" + tipRefName}, nil)
 		// activate branch compatibility mode
 		config, _ := repo.Config()
-		config.SetString("tie.pushTipsAs", "refs/heads/")
+		config.SetString(core.PushTipsAsConfigKey, "refs/heads/")
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
