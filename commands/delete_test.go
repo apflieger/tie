@@ -13,7 +13,7 @@ func TestDeleteCommand(t *testing.T) {
 		// create a tip with his tail and base
 		test.CreateTip(repo, "test", "refs/heads/master", false)
 
-		err := DeleteCommand(repo, []string{core.RefsTips + "test"}, context.Context)
+		err := DeleteCommand(repo, false, []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 
@@ -30,7 +30,7 @@ func TestDeleteCommand(t *testing.T) {
 		head, _ := repo.Head()
 		repo.References.Create("refs/heads/test", head.Target(), false, "")
 
-		err := DeleteCommand(repo, []string{"refs/heads/test"}, context.Context)
+		err := DeleteCommand(repo, false, []string{"refs/heads/test"}, context.Context)
 
 		// tie delete doesn't allow to delete branches
 		assert.NotNil(t, err)
@@ -56,7 +56,7 @@ func TestDeleteCommand(t *testing.T) {
 		repo.References.Create("refs/remotes/origin/tips/test", head.Target(), false, "")
 		origin.Push([]string{tipRefName + ":refs/heads/tips/test"}, nil)
 
-		err := DeleteCommand(repo, []string{tipRefName}, context.Context)
+		err := DeleteCommand(repo, false, []string{tipRefName}, context.Context)
 
 		assert.Nil(t, err)
 
@@ -73,11 +73,62 @@ func TestDeleteCommand(t *testing.T) {
 		// create an unreachable origin remote
 		repo.Remotes.Create("origin", "/dev/null")
 
-		err := DeleteCommand(repo, []string{core.RefsTips + "test"}, context.Context)
+		err := DeleteCommand(repo, false, []string{core.RefsTips + "test"}, context.Context)
 
 		assert.Nil(t, err)
 
 		// output should be...
 		assert.Contains(t, context.OutputBuffer.String(), "Tip 'test' has been deleted locally but not on origin")
+	})
+
+	t.Run("StackedOption", func(t *testing.T) {
+
+		test.RunOnRepo(t, "CurrentTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+			// Create a tip
+			test.CreateTip(repo, "test", "refs/heads/master", true)
+
+			// Commit a file
+			test.WriteFile(repo, true, "foo", "bar")
+			oid, _ := test.Commit(repo, nil)
+
+			// Update the master to this commit
+			master, _ := repo.References.Lookup("refs/heads/master")
+			master, _ = master.SetTarget(oid, "")
+
+			test.Commit(repo, &test.CommitParams{Refname: "refs/heads/master"})
+
+			assert.True(t, oid.Equal(master.Target()))
+
+			err := DeleteCommand(repo, true, nil, context.Context)
+			assert.Nil(t, err)
+
+			// output should be...
+			assert.Contains(t, context.OutputBuffer.String(), "Deleted tip 'test'\n")
+
+			head, _ := repo.Head()
+			assert.Equal(t, "refs/heads/master", head.Name())
+
+			_, err = repo.References.Lookup(core.RefsTips + "test")
+			assert.NotNil(t, err)
+		})
+
+		test.RunOnRepo(t, "EmptyTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+			// Create a tip
+			test.CreateTip(repo, "test", "refs/heads/master", true)
+
+			repo.SetHead("refs/heads/master")
+
+			err := DeleteCommand(repo, true, nil, context.Context)
+			assert.Nil(t, err)
+
+			// output should be...
+			assert.Contains(t, context.OutputBuffer.String(), "Deleted tip 'test'\n")
+
+			head, _ := repo.Head()
+			assert.Equal(t, "refs/heads/master", head.Name())
+
+			_, err = repo.References.Lookup(core.RefsTips + "test")
+			assert.NotNil(t, err)
+		})
 	})
 }

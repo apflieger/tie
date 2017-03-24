@@ -54,7 +54,7 @@ func buildCommitCommand(repo *git.Repository, context model.Context) *cobra.Comm
 	var message, tipName string
 
 	commitCommand := &cobra.Command{
-		Use:   "commit",
+		Use:   "commit [flags]",
 		Short: "Record changes in the currently selected tip",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.CommitCommand(repo, message, tipName, context)
@@ -133,7 +133,7 @@ func buildRewriteCommand(repo *git.Repository, context model.Context) *cobra.Com
 	var message string
 
 	amendCommand := &cobra.Command{
-		Use:   "amend",
+		Use:   "amend [flags]",
 		Short: "Meld changes into the previous commit",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.AmendCommand(repo, message, context)
@@ -178,7 +178,7 @@ func buildListCommand(repo *git.Repository, context model.Context) *cobra.Comman
 	var listTips, listBranches, listRemotes, listAll bool
 
 	listCommand := &cobra.Command{
-		Use:   "list",
+		Use:   "list [flags]",
 		Short: "List tips and branches",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return commands.ListCommand(repo, context, listTips, listBranches, listRemotes, listAll)
@@ -196,13 +196,17 @@ func buildListCommand(repo *git.Repository, context model.Context) *cobra.Comman
 }
 
 func buildDeleteCommand(repo *git.Repository, context model.Context) *cobra.Command {
+	var stacked bool
+
 	deleteCommand := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete [flags] [<tip>]",
 		Short: "Delete tips",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.DeleteCommand(repo, args, context)
+			return commands.DeleteCommand(repo, stacked, args, context)
 		},
 	}
+
+	deleteCommand.Flags().BoolVarP(&stacked, "stacked", "", false, "delete tips that have been stacked")
 
 	return deleteCommand
 }
