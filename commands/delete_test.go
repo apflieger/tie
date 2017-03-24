@@ -81,23 +81,50 @@ func TestDeleteCommand(t *testing.T) {
 		assert.Contains(t, context.OutputBuffer.String(), "Tip 'test' has been deleted locally but not on origin")
 	})
 
+	test.RunOnRepo(t, "CurrentTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		// Create a tip
+		test.CreateTip(repo, "test", "refs/heads/master", true)
+
+		// Commit a file
+		test.WriteFile(repo, true, "foo", "bar")
+		test.Commit(repo, nil)
+
+		// Delete the tip
+		err := DeleteCommand(repo, false, nil, context.Context)
+		assert.Nil(t, err)
+
+		// output should be...
+		assert.Contains(t, context.OutputBuffer.String(), "Deleted tip 'test'\n")
+
+		// HEAD should be back on master
+		head, _ := repo.Head()
+		assert.Equal(t, "refs/heads/master", head.Name())
+		// Status should be clean. Which means that the repo has been properly reset
+		test.StatusClean(t, repo)
+
+		// The tip should be deleted
+		_, err = repo.References.Lookup(core.RefsTips + "test")
+		assert.NotNil(t, err)
+	})
+
 	t.Run("StackedOption", func(t *testing.T) {
 
-		test.RunOnRepo(t, "CurrentTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
+		test.RunOnRepo(t, "SimpleTip", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 			// Create a tip
-			test.CreateTip(repo, "test", "refs/heads/master", true)
+			test.CreateTip(repo, "test", "refs/heads/master", false)
 
-			// Commit a file
+			// Commit a file on the tip
 			test.WriteFile(repo, true, "foo", "bar")
-			oid, _ := test.Commit(repo, nil)
+			oid, _ := test.Commit(repo, &test.CommitParams{Refname: core.RefsTips + "test"})
 
-			// Update the master to this commit
+			// Update the master to the last commit
 			master, _ := repo.References.Lookup("refs/heads/master")
 			master, _ = master.SetTarget(oid, "")
 
+			// Add one more commit to master
 			test.Commit(repo, &test.CommitParams{Refname: "refs/heads/master"})
 
-			assert.True(t, oid.Equal(master.Target()))
+			// At this point, master is one commit ahead of the tip
 
 			err := DeleteCommand(repo, true, nil, context.Context)
 			assert.Nil(t, err)
@@ -116,6 +143,7 @@ func TestDeleteCommand(t *testing.T) {
 			// Create a tip
 			test.CreateTip(repo, "test", "refs/heads/master", true)
 
+			// Select master
 			repo.SetHead("refs/heads/master")
 
 			err := DeleteCommand(repo, true, nil, context.Context)

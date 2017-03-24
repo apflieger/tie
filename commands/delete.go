@@ -21,6 +21,10 @@ func DeleteCommand(repo *git.Repository, stacked bool, refs []string, context mo
 				refs = append(refs, tip.Name())
 			}
 		}
+	} else if len(refs) == 0 {
+		// Delete the current tip
+		head, _ := repo.Head()
+		refs = []string{head.Name()}
 	}
 
 	for _, ref := range refs {
