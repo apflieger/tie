@@ -28,14 +28,7 @@ func RunOnRepo(t *testing.T, name string, test func(t *testing.T, context TestCo
 		defer CleanRepo(repo)
 		//fmt.Println("repo: " + repo.Workdir())
 
-		buffer := new(bytes.Buffer)
-		context := TestContext{
-			Context: model.Context{
-				RemoteCallbacks: git.RemoteCallbacks{},
-				Logger:          log.New(buffer, "", 0),
-			},
-			OutputBuffer: buffer,
-		}
+		context := createTestContext()
 		test(t, context, repo)
 	})
 }
@@ -57,14 +50,7 @@ func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context Test
 		remote, _ := repo.Remotes.Create("origin", origin.Path())
 		remote.Push([]string{"+refs/heads/master"}, nil)
 
-		buffer := new(bytes.Buffer)
-		context := TestContext{
-			Context: model.Context{
-				RemoteCallbacks: git.RemoteCallbacks{},
-				Logger:          log.New(buffer, "", 0),
-			},
-			OutputBuffer: buffer,
-		}
+		context := createTestContext()
 		test(t, context, repo, origin)
 	})
 }
@@ -81,6 +67,19 @@ func CleanRepo(repo *git.Repository) {
 	if len(path) > 5 { // Avoid dramatic rm -rf .
 		os.RemoveAll(path)
 	}
+}
+
+func createTestContext() TestContext {
+	buffer := new(bytes.Buffer)
+	context := TestContext{
+		Context: model.Context{
+			RemoteCallbacks: git.RemoteCallbacks{},
+			Logger:          log.New(buffer, "", 0),
+		},
+		OutputBuffer: buffer,
+	}
+
+	return context
 }
 
 func CreateTestRepo(bare bool) *git.Repository {
