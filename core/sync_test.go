@@ -10,7 +10,7 @@ import (
 )
 
 func TestUpdate(t *testing.T) {
-	test.RunOnThreeRepos(t, "BasicFetch", func(t *testing.T, context test.TestContext, repo, origin, another *git.Repository) {
+	test.RunOnThreeRepos(t, "UpdateCurrentBranch", func(t *testing.T, context test.TestContext, repo, origin, another *git.Repository) {
 		// HEAD is on origin/master
 		// asserting test setup
 		head, _ := repo.Head()
@@ -58,5 +58,46 @@ func TestUpdate(t *testing.T) {
 
 		err := Fetch(repo, context.Context)
 		assert.Nil(t, err)
+	})
+
+	test.RunOnThreeRepos(t, "MultipleRefs", func(t *testing.T, context test.TestContext, repo, origin, another *git.Repository) {
+		remote, _ := another.Remotes.Lookup("origin")
+
+		// Create two branches on the remote
+		remote.Push([]string{
+			"refs/heads/master:refs/heads/another_branch",
+			"refs/heads/master:refs/heads/to_be_deleted",
+		}, nil)
+
+		Fetch(repo, context.Context)
+
+		// The two branches should have been fetched
+		_, err := repo.References.Lookup("refs/remotes/origin/another_branch")
+		assert.Nil(t, err)
+
+		_, err = repo.References.Lookup("refs/remotes/origin/to_be_deleted")
+		assert.Nil(t, err)
+
+		// Output should be...
+		assert.Equal(t,
+			"Created refs/remotes/origin/another_branch\n"+
+				"Created refs/remotes/origin/to_be_deleted\n",
+			context.OutputBuffer.String())
+
+		// Delete a branch
+		remote.Push([]string{":refs/heads/to_be_deleted"}, nil)
+
+		// Reset the output buffer and rerun update
+		context.OutputBuffer.Reset()
+		Fetch(repo, context.Context)
+
+		// The branch should be pruned
+		_, err = repo.References.Lookup("refs/remotes/origin/to_be_deleted")
+		assert.NotNil(t, err)
+
+		// Output should be...
+		assert.Equal(t,
+			"Deleted refs/remotes/origin/to_be_deleted\n",
+			context.OutputBuffer.String())
 	})
 }

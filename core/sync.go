@@ -24,16 +24,25 @@ func Fetch(repo *git.Repository, context model.Context) error {
 				tree, _ := commit.Tree()
 				repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
 			}
-			context.Logger.Printf("Updated %v\n", refname)
+			var message string
+			if a.IsZero() {
+				message = "Created %v\n"
+			} else if b.IsZero() {
+				message = "Deleted %v\n"
+			} else {
+				message = "Updated %v\n"
+			}
+			context.Logger.Printf(message, refname)
 			return git.ErrOk
 		},
 	}
+
 	fetchOptions := &git.FetchOptions{
 		Prune:           git.FetchPruneOn,
 		RemoteCallbacks: remoteCallbacks,
 	}
-
-	return remote.Fetch([]string{"+refs/heads/master:refs/remotes/origin/master"}, fetchOptions, "")
+	refspecs, _ := remote.FetchRefspecs()
+	return remote.Fetch(refspecs, fetchOptions, "")
 }
 
 func remoteOf(refname string, config *git.Config) (string, error) {

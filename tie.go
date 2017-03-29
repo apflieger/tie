@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apflieger/tie/commands"
+	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/env"
 	"github.com/apflieger/tie/model"
 	"github.com/spf13/cobra"
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"os"
-	"github.com/apflieger/tie/core"
 )
 
 func main() {
