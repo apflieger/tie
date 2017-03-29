@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"gopkg.in/libgit2/git2go.v25"
 	"regexp"
@@ -48,7 +47,7 @@ func Shorthand(ref string) string {
 
 func TipName(refName string) (string, error) {
 	if !strings.HasPrefix(refName, RefsTips) {
-		return "", errors.New("")
+		return "", fmt.Errorf("Ref '%v' is not a tip", refName)
 	}
 	return strings.Replace(refName, RefsTips, "", 1), nil
 }

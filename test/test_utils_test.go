@@ -15,6 +15,7 @@ func TestDumbForCodeCoverage(t *testing.T) {
 	WriteFile(repo, true, "foo", "bar")
 
 	CreateTip(repo, "test", "refs/heads/master", true)
+	RunOnThreeRepos(t, "DumbCallForCoverage", func(t *testing.T, context TestContext, repo, origin, another *git.Repository) {})
 }
 
 func TestRunOnRemote(t *testing.T) {

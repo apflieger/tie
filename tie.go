@@ -10,6 +10,7 @@ import (
 	"gopkg.in/libgit2/git2go.v25"
 	"log"
 	"os"
+	"github.com/apflieger/tie/core"
 )
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 	rootCmd.AddCommand(buildListCommand(repo, context))
 	rootCmd.AddCommand(buildDeleteCommand(repo, context))
 	rootCmd.AddCommand(buildStackCommand(repo, context))
+	rootCmd.AddCommand(buildUpdateCommand(repo, context))
 
 	rootCmd.Execute()
 }
@@ -221,4 +223,16 @@ func buildStackCommand(repo *git.Repository, context model.Context) *cobra.Comma
 	}
 
 	return stackCommand
+}
+
+func buildUpdateCommand(repo *git.Repository, context model.Context) *cobra.Command {
+	updateCommand := &cobra.Command{
+		Use:   "update",
+		Short: "Synchronize remote refs",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return core.Fetch(repo, context)
+		},
+	}
+
+	return updateCommand
 }

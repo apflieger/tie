@@ -55,6 +55,31 @@ func RunOnRemote(t *testing.T, name string, test func(t *testing.T, context Test
 	})
 }
 
+func RunOnThreeRepos(t *testing.T, name string, test func(t *testing.T, context TestContext, repo, origin, another *git.Repository)) {
+	t.Run(name, func(t *testing.T) {
+		repo := CreateTestRepo(false)
+		origin := CreateTestRepo(true)
+		another := CreateTestRepo(false)
+		defer CleanRepo(repo)
+		defer CleanRepo(origin)
+		defer CleanRepo(another)
+		//fmt.Println("repo: " + repo.Workdir())
+		//fmt.Println("remote: " + origin.Path())
+		//fmt.Println("another: " + another.Workdir())
+
+		remote, _ := repo.Remotes.Create("origin", origin.Path())
+		remote.Push([]string{"+refs/heads/master"}, nil)
+
+		anotherRemote, _ := another.Remotes.Create("origin", origin.Path())
+		anotherRemote.Fetch([]string{"+refs/heads/master:refs/remotes/origin/master"}, nil, "")
+
+		repo.References.CreateSymbolic("HEAD", "refs/remotes/origin/master", true, "")
+
+		context := createTestContext()
+		test(t, context, repo, origin, another)
+	})
+}
+
 func CleanRepo(repo *git.Repository) {
 	var path string
 
