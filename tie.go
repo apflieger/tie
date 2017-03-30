@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/apflieger/tie/commands"
-	"github.com/apflieger/tie/core"
 	"github.com/apflieger/tie/env"
 	"github.com/apflieger/tie/model"
 	"github.com/spf13/cobra"
@@ -41,7 +40,6 @@ func main() {
 
 	rootCmd.AddCommand(buildCommitCommand(repo, context))
 	rootCmd.AddCommand(buildSelectCommand(repo, context))
-	rootCmd.AddCommand(buildUpgradeCommand(repo, context))
 	rootCmd.AddCommand(buildRewriteCommand(repo, context))
 	rootCmd.AddCommand(buildCreateCommand(repo, context))
 	rootCmd.AddCommand(buildListCommand(repo, context))
@@ -86,33 +84,33 @@ func buildSelectCommand(repo *git.Repository, context model.Context) *cobra.Comm
 	return selectCommand
 }
 
-func buildUpgradeCommand(repo *git.Repository, context model.Context) *cobra.Command {
-	upgradeCommand := &cobra.Command{
-		Use:   "upgrade",
-		Short: "Get the current tip up-to-date with it's base",
+func buildUpdateCommand(repo *git.Repository, context model.Context) *cobra.Command {
+	updateCommand := &cobra.Command{
+		Use:   "update",
+		Short: "Retrieve latest commits from the remote",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.UpgradeCommand(repo, context)
+			return commands.UpdateCommand(repo, context)
 		},
 	}
 
 	abortCommand := &cobra.Command{
 		Use: "abort",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.UpgradeAbortCommand(repo)
+			return commands.UpdateAbortCommand(repo)
 		},
 	}
 
 	continueCommand := &cobra.Command{
 		Use: "continue",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return commands.UpgradeContinueCommand(repo)
+			return commands.UpdateContinueCommand(repo)
 		},
 	}
 
-	upgradeCommand.AddCommand(abortCommand)
-	upgradeCommand.AddCommand(continueCommand)
+	updateCommand.AddCommand(abortCommand)
+	updateCommand.AddCommand(continueCommand)
 
-	return upgradeCommand
+	return updateCommand
 }
 
 func buildRewriteCommand(repo *git.Repository, context model.Context) *cobra.Command {
@@ -223,16 +221,4 @@ func buildStackCommand(repo *git.Repository, context model.Context) *cobra.Comma
 	}
 
 	return stackCommand
-}
-
-func buildUpdateCommand(repo *git.Repository, context model.Context) *cobra.Command {
-	updateCommand := &cobra.Command{
-		Use:   "update",
-		Short: "Synchronize remote refs",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return core.Fetch(repo, context)
-		},
-	}
-
-	return updateCommand
 }
