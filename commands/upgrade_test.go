@@ -5,10 +5,10 @@ import (
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
+	"io/ioutil"
 )
 
 func TestUpdateCommand(t *testing.T) {
@@ -33,8 +33,30 @@ func TestUpdateCommand(t *testing.T) {
 			// Local origin/master should be on the commit
 			assert.True(t, oid.Equal(originMaster.Target()))
 			// File "foo" should exist
-			_, err := os.Stat(filepath.Join(repo.Workdir(), "foo"))
-			assert.Nil(t, err)
+			foo, _ := ioutil.ReadFile(filepath.Join(repo.Workdir(), "foo"))
+			assert.Equal(t, "foobar", string(foo))
+
+			test.StatusClean(t, repo)
+
+			// Output should be...
+			assert.Equal(t, "Updated refs/remotes/origin/master\n", context.OutputBuffer.String())
+
+			// For some obscure reasons, this first update is not sufficient
+			// A 2nd update will test the baseline parameters of CheckoutTree
+
+			// Commit on master from "another" and push it to origin
+			test.WriteFile(another, true, "foo", "foobarbar")
+			oid, _ = test.Commit(another, nil)
+			remote.Push([]string{"+refs/heads/master"}, nil)
+
+			context.OutputBuffer.Reset()
+			UpdateCommand(repo, context.Context)
+
+			originMaster, _ = repo.References.Lookup("refs/remotes/origin/master")
+			// Local origin/master should be on the commit
+			assert.True(t, oid.Equal(originMaster.Target()))
+			foo, _ = ioutil.ReadFile(filepath.Join(repo.Workdir(), "foo"))
+			assert.Equal(t, "foobarbar", string(foo))
 
 			test.StatusClean(t, repo)
 

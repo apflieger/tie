@@ -32,9 +32,15 @@ func fetch(repo *git.Repository, context model.Context) error {
 		CertificateCheckCallback: context.RemoteCallbacks.CertificateCheckCallback,
 		UpdateTipsCallback: func(refname string, a *git.Oid, b *git.Oid) git.ErrorCode {
 			if refname == head.Name() {
-				commit, _ := repo.LookupCommit(b)
-				tree, _ := commit.Tree()
-				repo.CheckoutTree(tree, &git.CheckoutOpts{Strategy: git.CheckoutSafe})
+				// head.Target() should be equal to a
+				baselineCommit, _ := repo.LookupCommit(a)
+				baselineTree, _ := baselineCommit.Tree()
+				checkoutCommit, _ := repo.LookupCommit(b)
+				checkoutTree, _ := checkoutCommit.Tree()
+				repo.CheckoutTree(checkoutTree, &git.CheckoutOpts{
+					Strategy: git.CheckoutSafe,
+					Baseline: baselineTree,
+				})
 			}
 			var message string
 			if a.IsZero() {
