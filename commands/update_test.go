@@ -5,10 +5,10 @@ import (
 	"github.com/apflieger/tie/test"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/libgit2/git2go.v25"
+	"io/ioutil"
 	"path/filepath"
 	"testing"
 	"time"
-	"io/ioutil"
 )
 
 func TestUpdateCommand(t *testing.T) {
@@ -27,7 +27,8 @@ func TestUpdateCommand(t *testing.T) {
 			remote, _ := another.Remotes.Lookup("origin")
 			remote.Push([]string{"+refs/heads/master"}, nil)
 
-			UpdateCommand(repo, context.Context)
+			err := UpdateCommand(repo, context.Context)
+			assert.Nil(t, err)
 
 			originMaster, _ := repo.References.Lookup("refs/remotes/origin/master")
 			// Local origin/master should be on the commit
@@ -50,7 +51,8 @@ func TestUpdateCommand(t *testing.T) {
 			remote.Push([]string{"+refs/heads/master"}, nil)
 
 			context.OutputBuffer.Reset()
-			UpdateCommand(repo, context.Context)
+			err = UpdateCommand(repo, context.Context)
+			assert.Nil(t, err)
 
 			originMaster, _ = repo.References.Lookup("refs/remotes/origin/master")
 			// Local origin/master should be on the commit
@@ -96,10 +98,11 @@ func TestUpdateCommand(t *testing.T) {
 				"refs/heads/master:refs/heads/to_be_deleted",
 			}, nil)
 
-			UpdateCommand(repo, context.Context)
+			err := UpdateCommand(repo, context.Context)
+			assert.Nil(t, err)
 
 			// The two branches should have been fetched
-			_, err := repo.References.Lookup("refs/remotes/origin/another_branch")
+			_, err = repo.References.Lookup("refs/remotes/origin/another_branch")
 			assert.Nil(t, err)
 
 			_, err = repo.References.Lookup("refs/remotes/origin/to_be_deleted")
@@ -116,7 +119,8 @@ func TestUpdateCommand(t *testing.T) {
 
 			// Reset the output buffer and rerun update
 			context.OutputBuffer.Reset()
-			UpdateCommand(repo, context.Context)
+			err = UpdateCommand(repo, context.Context)
+			assert.Nil(t, err)
 
 			// The branch should be pruned
 			_, err = repo.References.Lookup("refs/remotes/origin/to_be_deleted")
@@ -130,14 +134,6 @@ func TestUpdateCommand(t *testing.T) {
 	})
 
 	t.Run("Upgrade", func(t *testing.T) {
-
-		test.RunOnRepo(t, "NoTipSelected", func(t *testing.T, context test.TestContext, repo *git.Repository) {
-			err := UpdateCommand(repo, context.Context)
-
-			if assert.NotNil(t, err) {
-				assert.Equal(t, "HEAD not on a tip. Only tips can be upgraded.", err.Error())
-			}
-		})
 
 		test.RunOnRepo(t, "NoBase", func(t *testing.T, context test.TestContext, repo *git.Repository) {
 			// Create and select a tip

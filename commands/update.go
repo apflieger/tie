@@ -89,7 +89,7 @@ func UpdateCommand(repo *git.Repository, context model.Context) error {
 	tipName, err := core.TipName(head.Name())
 
 	if err != nil {
-		return errors.New("HEAD not on a tip. Only tips can be upgraded.")
+		return nil
 	}
 
 	config, _ := repo.Config()
