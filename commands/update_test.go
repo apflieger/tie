@@ -66,6 +66,43 @@ func TestUpdateCommand(t *testing.T) {
 			assert.Equal(t, "Updated refs/remotes/origin/master\n", context.OutputBuffer.String())
 		})
 
+		test.RunOnThreeRepos(t, "UpdateDirtyStateSafe", func(t *testing.T, context test.TestContext, repo, origin, another *git.Repository) {
+			// Commit 2 files on master from "another" and push it to origin
+			test.WriteFile(another, true, "foo", "foobar")
+			test.WriteFile(another, true, "bar", "foobar")
+			oid, _ := test.Commit(another, nil)
+			remote, _ := another.Remotes.Lookup("origin")
+			remote.Push([]string{"+refs/heads/master"}, nil)
+
+			err := UpdateCommand(repo, context.Context)
+
+			// Commit on master from "another" on one file
+			test.WriteFile(another, true, "foo", "foobarbar")
+			oid, _ = test.Commit(another, nil)
+			remote.Push([]string{"+refs/heads/master"}, nil)
+
+			// Edit the other file locally
+			test.WriteFile(repo, false, "bar", "barbar")
+
+			err = UpdateCommand(repo, context.Context)
+			assert.Nil(t, err)
+
+			// The update should be ok because bar file hasn't changed on the remote
+			originMaster, _ := repo.References.Lookup("refs/remotes/origin/master")
+			assert.True(t, oid.Equal(originMaster.Target()))
+			// The local change should still be there
+			bar, _ := ioutil.ReadFile(filepath.Join(repo.Workdir(), "bar"))
+			assert.Equal(t, "barbar", string(bar))
+
+			statusList, _ := repo.StatusList(
+				&git.StatusOptions{
+					Show:     git.StatusShowIndexAndWorkdir,
+					//Pathspec: nil,
+				})
+			statusCount, _ := statusList.EntryCount()
+			assert.Equal(t, 1, statusCount, "status not clean")
+		})
+
 		test.RunOnRemote(t, "OnTip", func(t *testing.T, context test.TestContext, repo, origin *git.Repository) {
 			test.CreateTip(repo, "test", "refs/remotes/origin/master", true)
 
