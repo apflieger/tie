@@ -123,7 +123,7 @@ func UpdateCommand(repo *git.Repository, context model.Context) error {
 		return err
 	}
 
-	tailRef.SetTarget(baseRef.Target(), "tie upgrade")
+	tailRef.SetTarget(baseRef.Target(), "tie update")
 
 	if rebase.OperationCount() > 0 {
 		err = core.PushTip(repo, tipName, context)
@@ -131,7 +131,7 @@ func UpdateCommand(repo *git.Repository, context model.Context) error {
 
 	rebase.Free()
 
-	context.Logger.Printf("Upgraded current tip '%v'\n", tipName)
+	context.Logger.Printf("Upgraded current tip '%v' on top of '%v'\n", tipName, baseRefName)
 
 	return nil
 }
@@ -170,7 +170,7 @@ func iterate(repo *git.Repository, rebase *git.Rebase) error {
 	headName := strings.Trim(string(bytes), "\n")
 	tipName, _ := core.TipName(headName)
 
-	repo.References.Create(core.RefsTails+tipName, onto, true, "tie upgrade")
+	repo.References.Create(core.RefsTails+tipName, onto, true, "tie update")
 
 	return rebase.Finish()
 }

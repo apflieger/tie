@@ -29,7 +29,7 @@ func StackCommand(repo *git.Repository, context model.Context) error {
 
 	tail, _ := repo.References.Lookup(core.RefsTails + tipName)
 	if !tail.Target().Equal(base.Target()) {
-		return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please upgrade\n", tipName, baseRefName)
+		return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please update\n", tipName, baseRefName)
 	}
 
 	if notRemote != nil {
@@ -53,7 +53,7 @@ func StackCommand(repo *git.Repository, context model.Context) error {
 		pushErr := remote.Push([]string{head.Name() + ":" + pushRef}, pushOptions)
 		gitErr, isGitErr := pushErr.(*git.GitError)
 		if isGitErr && gitErr.Code == git.ErrNonFastForward {
-			return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please upgrade\n", tipName, baseRefName)
+			return fmt.Errorf("Current tip '%v' is out of date with its base '%v'. Please update\n", tipName, baseRefName)
 		}
 	}
 

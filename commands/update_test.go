@@ -226,7 +226,7 @@ func TestUpdateCommand(t *testing.T) {
 			}
 
 			// Output should be...
-			assert.Equal(t, "Upgraded current tip 'test'\n", context.OutputBuffer.String())
+			assert.Equal(t, "Upgraded current tip 'test' on top of 'refs/remotes/origin/master'\n", context.OutputBuffer.String())
 		})
 
 		test.RunOnRemote(t, "ConflictAbort", func(t *testing.T, context test.TestContext, repo, remote *git.Repository) {
