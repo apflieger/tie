@@ -201,12 +201,7 @@ func WriteFile(repo *git.Repository, add bool, file string, lines ...string) {
 }
 
 func StatusClean(t *testing.T, repo *git.Repository) bool {
-	statusList, _ := repo.StatusList(
-		&git.StatusOptions{
-			Show:     git.StatusShowIndexAndWorkdir,
-			Flags:    git.StatusOptIncludeUntracked,
-			Pathspec: nil,
-		})
+	statusList, _ := repo.StatusList(nil)
 	statusCount, _ := statusList.EntryCount()
 	return assert.Equal(t, 0, statusCount, "status not clean")
 }
