@@ -20,11 +20,23 @@ const (
 
 func fetch(repo *git.Repository, context model.Context) error {
 	head, _ := repo.Head()
+
+	_, _, err := core.ExplodeRemoteRef(head.Name())
+	if err == nil {
+		// prevent update if current ref is a remote
+		statusList, _ := repo.StatusList(nil)
+		statusCount, _ := statusList.EntryCount()
+		if statusCount != 0 {
+			return fmt.Errorf("Status should be clean before updating on a remote ref: %v", head.Name())
+		}
+	}
+
 	config, _ := repo.Config()
 	remoteName, err := remoteOf(head.Name(), config)
 	if err != nil {
 		return nil
 	}
+
 	remote, _ := repo.Remotes.Lookup(remoteName)
 
 	remoteCallbacks := git.RemoteCallbacks{
@@ -32,7 +44,6 @@ func fetch(repo *git.Repository, context model.Context) error {
 		CertificateCheckCallback: context.RemoteCallbacks.CertificateCheckCallback,
 		UpdateTipsCallback: func(refname string, a *git.Oid, b *git.Oid) git.ErrorCode {
 			if refname == head.Name() {
-				// head.Target() should be equal to a
 				baselineCommit, _ := repo.LookupCommit(a)
 				baselineTree, _ := baselineCommit.Tree()
 				checkoutCommit, _ := repo.LookupCommit(b)
@@ -83,7 +94,10 @@ func remoteOf(refname string, config *git.Config) (string, error) {
 Select the given refname. refname can be shorthand.
 */
 func UpdateCommand(repo *git.Repository, context model.Context) error {
-	fetch(repo, context)
+	err := fetch(repo, context)
+	if err != nil {
+		return err
+	}
 
 	head, _ := repo.Head()
 	tipName, err := core.TipName(head.Name())
