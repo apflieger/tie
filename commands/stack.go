@@ -22,9 +22,11 @@ func StackCommand(repo *git.Repository, context model.Context) error {
 
 	remoteName, pushRef, notRemote := core.ExplodeRemoteRef(baseRefName)
 	base, _ := repo.References.Lookup(baseRefName)
+	baseTipName, notOnLocalTip := core.TipName(baseRefName)
 
-	if !base.IsBranch() && !core.IsBranch(pushRef) {
-		return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches.", baseRefName)
+	// Allow to stack on local branch, remote branch or local tips only.
+	if !(base.IsBranch() || core.IsBranch(pushRef) || notOnLocalTip == nil) {
+		return fmt.Errorf("Cannot stack the current tip on his base '%v'. Tips can only be stacked on branches or local tips.", baseRefName)
 	}
 
 	tail, _ := repo.References.Lookup(core.RefsTails + tipName)
@@ -37,6 +39,9 @@ func StackCommand(repo *git.Repository, context model.Context) error {
 		// This guaranty the base to be fastforwarded
 		base.SetTarget(head.Target(), "stack tip "+tipName) // base is not mutated, .Target will still return the previous one
 		printStackInfo(repo, context.Logger, baseRefName, head.Name(), base.Target(), head.Target())
+		if notOnLocalTip == nil {
+			core.PushTip(repo, baseTipName, context)
+		}
 	} else {
 		remote, _ := repo.Remotes.Lookup(remoteName)
 		pushOptions := &git.PushOptions{

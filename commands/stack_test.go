@@ -161,24 +161,36 @@ func TestStack(t *testing.T) {
 
 		// Stack doesn't allow to stack on tips for now
 		if assert.NotNil(t, err) {
-			assert.Contains(t, err.Error(), "Tips can only be stacked on branches")
+			assert.Contains(t, err.Error(), "Tips can only be stacked on branches or local tips")
 		}
 	})
 
-	test.RunOnRepo(t, "LocalTipError", func(t *testing.T, context test.TestContext, repo *git.Repository) {
-		// Create a tip on a remote tip
-		test.CreateTip(repo, "test1", "refs/heads/master", true)
+	test.RunOnRemote(t, "LocalTipError", func(t *testing.T, context test.TestContext, repo, origin *git.Repository) {
+		// Create a tip on an remote tip
+		test.CreateTip(repo, "test1", "refs/remotes/origin/master", true)
 		test.Commit(repo, nil)
+		core.PushTip(repo, "test1", context.Context) // test.Commit doesn't push
 		test.CreateTip(repo, "test2", core.RefsTips+"test1", true)
-		test.Commit(repo, nil)
+		oid, _ := test.Commit(repo, nil)
 
 		// Stack it
 		err := StackCommand(repo, context.Context)
 
-		// Stack doesn't allow to stack on tips for now
-		if assert.NotNil(t, err) {
-			assert.Contains(t, err.Error(), "Tips can only be stacked on branches")
-		}
+		assert.Nil(t, err)
+
+		// test1 should have been selected, fast forwarded and pushed
+		head, _ := repo.Head()
+		assert.Equal(t, core.RefsTips+"test1", head.Name())
+		assert.True(t, head.Target().Equal(oid))
+		test1, _ := repo.References.Lookup(core.RefsRemoteTips + "origin/test1")
+		assert.True(t, test1.Target().Equal(oid))
+
+		// test2 should be deleted
+		_, noTip := repo.References.Lookup(core.RefsTips + "test2")
+		assert.NotNil(t, noTip)
+
+		// Output should be...
+		assert.Equal(t, "test1 <- test2 (1 commit)\nDeleted tip 'test2'\n", context.OutputBuffer.String())
 	})
 
 	test.RunOnRemote(t, "TwoTipStackError", func(t *testing.T, context test.TestContext, repo, origin *git.Repository) {
