@@ -90,9 +90,6 @@ func remoteOf(refname string, config *git.Config) (string, error) {
 	return remoteOf(base, config)
 }
 
-/**
-Select the given refname. refname can be shorthand.
-*/
 func UpdateCommand(repo *git.Repository, context model.Context) error {
 	err := fetch(repo, context)
 	if err != nil {
