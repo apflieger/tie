@@ -1,29 +1,29 @@
 language: go
 
 go:
-    - 1.7.x
+    - 1.8.x
 
-addons:
-    apt:
-        packages:
-            - libgit2-24
+#addons:
+#    apt:
+#        packages:
+#            this doesn't work, don't know why.
+#            - libgit2-24
 
 before_script:
-    #- wget https://github.com/libgit2/libgit2/archive/v0.25.1.tar.gz -O /tmp/libgit2.tar.gz
-    #- tar -xvf /tmp/libgit2.tar.gz
-    #- mv libgit2-0.25.1 libgit2
-    #- mkdir libgit2/build && cd libgit2/build
-    #- cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local
-    #- cmake --build . --target install
-    #- export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD
-    #- export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
-    #- export CGO_LDFLAGS="$CGO_LDFLAGS -L$PWD"
-    #- cd ../..
+    - wget https://github.com/libgit2/libgit2/archive/v0.25.1.tar.gz -O /tmp/libgit2.tar.gz
+    - tar -xvf /tmp/libgit2.tar.gz
+    - mv libgit2-0.25.1 libgit2
+    - mkdir libgit2/build && cd libgit2/build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=../_install
+    - cmake --build . --target install
+    - export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PWD
+    - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD
+    - export CGO_LDFLAGS="$CGO_LDFLAGS -L$PWD"
+    - cd ../..
 
 script:
-    # To run tests while developing, use 'go test ./...'
-    - ./code-coverage.sh
+    - make cover
     - test -z "$(gofmt -l **/*.go 2>&1)"
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash)
