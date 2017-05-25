@@ -1,7 +1,7 @@
 language: go
 
 go:
-    - 1.7.x
+    - 1.8.x
 
 addons:
     apt:
@@ -21,9 +21,8 @@ before_script:
     #- cd ../..
 
 script:
-    # To run tests while developing, use 'go test ./...'
-    - ./code-coverage.sh
+    - make test
     - test -z "$(gofmt -l **/*.go 2>&1)"
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash)
